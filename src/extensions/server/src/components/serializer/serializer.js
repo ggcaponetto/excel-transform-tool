@@ -3,6 +3,7 @@ dotenv.config()
 import {HNSWLib} from "langchain/vectorstores/hnswlib";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import * as url from 'url';
+import fs from "fs/promises"
 const __filename = url.fileURLToPath(import.meta.url);
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
@@ -16,12 +17,12 @@ function getCost(text){
         unit: "Dollars"
     };
 }
-async function createVectorStore(textArray, metadataArray, path){
+async function createVectorStore(textArray, metadataArray, path, options = {}){
     // Create a vector store through any method, here from texts as an example
     const vectorStore = await HNSWLib.fromTexts(
         textArray,
         metadataArray,
-        new OpenAIEmbeddings()
+        new OpenAIEmbeddings(options)
     );
 
     // Save the vector store to a directory
@@ -29,13 +30,21 @@ async function createVectorStore(textArray, metadataArray, path){
     return vectorStore;
 }
 
-async function loadVectorStore(path) {
+async function loadVectorStore(path, options={}) {
     return await HNSWLib.load(
         path,
-        new OpenAIEmbeddings()
+        new OpenAIEmbeddings(options)
     );
 }
+async function writeFile(path, content){
+    try {
+        return await fs.writeFile(path, content);
+    } catch (err) {
+        console.log(err);
+    }
+}
 export default {
+    writeFile,
     getCost,
     createVectorStore,
     loadVectorStore
