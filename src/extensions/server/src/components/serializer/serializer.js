@@ -67,9 +67,9 @@ async function createStore(options = {
     return opts;
 }
 async function loadStore(options = {
-    path: `${__dirname}/store`
+    path: null
 }) {
-    const directory = path.resolve(options.path);
+    const directory = options.path;
     // Load the vector store from the same directory
     const loadedVectorStore = await HNSWLib.load(
         directory,
