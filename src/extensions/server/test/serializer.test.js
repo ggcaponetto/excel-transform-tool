@@ -52,6 +52,17 @@ describe('serializer', function () {
         assert.notEqual(response, null);
     });
 
+    it('loads a vector store from disk', async function(){
+        // loads the vector store from disk. Every load costs "embedding tokens"
+        let vectorStore = await serializer.loadVectorStore(
+            path.resolve(`${__dirname}/../vectorstores/whoami`),
+            {
+                modelName: "text-embedding-ada-002"
+            }
+        )
+        assert.notEqual(vectorStore, null);
+    })
+
     it('queries openai with documents from vector store', async function () {
         this.timeout(1000*60)
         let textArray = [
@@ -72,20 +83,11 @@ describe('serializer', function () {
                 modelName: "text-embedding-ada-002"
             }
         );
-        /*
-        // loads the vector store from disk. Every load costs "embedding tokens"
-        let vectorStore = await serializer.loadVectorStore(
-            path.resolve(`${__dirname}/../vectorstores/whoami`),
-            {
-                modelName: "text-embedding-ada-002"
-            }
-        )
-        */
         let docs = await vectorStore.similaritySearch(
             "does giuseppe know react?",
             3
         )
-        let question = "Who is Giuseppe and what does he do?";
+        let question = "Who is Giuseppe and what does he do? Give me a short description of his job.";
         let tokenCountQuestion = encoder.getTokenCount(question);
         let tokenCountDocuments = encoder.getTokenCount(docs.map(d => d.pageContent).join("\n"));
 
@@ -104,7 +106,6 @@ describe('serializer', function () {
             docs,
             question,
             chatOpenAIOptions: {
-                temperature: 0 ,
                 modelName: "gpt-3.5-turbo"
             }
         })

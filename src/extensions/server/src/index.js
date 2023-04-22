@@ -1,7 +1,10 @@
+import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+dotenv.config()
 import express from "express"
 import cors from "cors"
 import axios from "axios";
 import Store from "./components/store/store.js";
+import openai from "./components/openai/openai.js";
 const app = express()
 const port = process.env.PORT || 4000
 
@@ -33,14 +36,40 @@ app.use(express.json(
     }
 ));
 
+app.post('/query', async (req, res) => {
+    res.set("Content-Type", "application/json");
+    let apiKey = req.body.apiKey;
+    let paidResponse = await hasUserPaid("myfirstextension", apiKey.extensionpay_api_key);
+    let query = req.body.query;
+    let context = req.body.context;
+    if(paidResponse.paid){
+        let response = await openai.query({
+            docs: [],
+            question: query,
+            chatOpenAIOptions: {
+                modelName: "gpt-3.5-turbo"
+            }
+        })
+        res.send(JSON.stringify({
+            query: req.body.query,
+            context: req.body.context,
+            response
+        }))
+    } else {
+        res.status(402).send({
+            message: "A payment is required for this feature"
+        })
+    }
+})
+
 app.post('/paid', async (req, res) => {
     res.set("Content-Type", "application/json");
     let apiKey = req.body.apiKey;
     let user = req.body.user;
-    let hasPaid = await hasUserPaid("myfirstextension", apiKey.extensionpay_api_key);
+    let paidResponse = await hasUserPaid("myfirstextension", apiKey.extensionpay_api_key);
     res.send(JSON.stringify({
         message: `Requested if user ${user.email} with API key ${apiKey.extensionpay_api_key} has a paid subscription.`,
-        paid: hasPaid
+        paid: paidResponse
     }))
 })
 
@@ -49,10 +78,10 @@ app.post('/status', async (req, res) => {
     try {
         let apiKey = req.body.apiKey;
         let user = req.body.user;
-        let hasPaid = await hasUserPaid("myfirstextension", apiKey.extensionpay_api_key);
+        let paidResponse = await hasUserPaid("myfirstextension", apiKey.extensionpay_api_key);
         res.send(JSON.stringify({
             message: `Requested store for user ${user.email}`,
-            paid: hasPaid,
+            paid: paidResponse,
             store: store.getStore(user.email)
         }))
     } catch (e){
