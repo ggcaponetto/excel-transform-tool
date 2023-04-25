@@ -5,6 +5,7 @@ import API from "../api/API";
 import axios from "axios";
 import * as process from "process";
 import ETT from "../ett/ETT";
+import BasicTabs from "@pages/popup/components/tabs/Tabs";
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
 async function getUser() {
@@ -53,7 +54,20 @@ const Home = () => {
     if (isLoading) {
       return <div>loading...</div>;
     } else if (user && user.paid) {
-      return <ETT />;
+      return (
+        <BasicTabs
+          titles={{
+            0: <div>introduction</div>,
+            1: <div>tranform</div>,
+            2: <div>settings</div>,
+          }}
+          components={{
+            0: <div>introduction</div>,
+            1: <ETT />,
+            2: <div>settings</div>,
+          }}
+        />
+      );
       /*return (
         <div>
           <div>all good, you paid. here is your reward.</div>
