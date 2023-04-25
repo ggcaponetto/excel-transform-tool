@@ -24,6 +24,10 @@ const ETT = () => {
     const data = await file.arrayBuffer();
     const workbook = read(data, {});
     console.log("workbook ready", workbook);
+
+    /* Create a new workbook */
+    const newWorkbook = XLSX.utils.book_new();
+
     /* Iterate all sheets */
     Object.keys(workbook.Sheets).forEach((sheetName) => {
       const sheet = workbook.Sheets[sheetName];
@@ -31,7 +35,12 @@ const ETT = () => {
       const range = XLSX.utils.decode_range(sheet["!ref"]);
       console.log("row count is", range.e.r);
       console.log("column count is", range.e.c);
+
+      /* Clone this worksheet with the transformations */
+      const clonedWorksheet = JSON.parse(JSON.stringify(sheet)); // make a copy of the object
+      XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
     });
+    console.log("New workbook is", newWorkbook);
   }
   return (
     <div className="ETT">
