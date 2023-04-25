@@ -4,7 +4,7 @@ function Store(dbName, storeName, options) {
   this.options = options;
   this.db = null;
 
-  const open = () => {
+  const open = (onIndexCreation) => {
     // Let us open our database
     return new Promise((res, rej) => {
       const request = window.indexedDB.open(this.dbName, 2);
@@ -16,6 +16,7 @@ function Store(dbName, storeName, options) {
         const db = event.target.result;
         // Create an objectStore for this database
         const objectStore = db.createObjectStore(this.storeName, this.options);
+        onIndexCreation(objectStore);
       };
       request.onsuccess = (event) => {
         this.db = event.target.result;
@@ -31,37 +32,84 @@ function Store(dbName, storeName, options) {
   };
   const write = (data) => {
     console.log("writing to db", this.db);
-    const transaction = this.db.transaction([this.storeName], "readwrite");
-    // Do something when all the data is added to the database.
-    transaction.oncomplete = (event) => {
-      console.log("All done!", event);
-    };
-
-    transaction.onerror = (event) => {
-      // Don't forget to handle errors!
-    };
-    const objectStore = transaction.objectStore(this.storeName);
-    data.forEach((customer) => {
-      const request = objectStore.add(customer);
+    return new Promise((res, rej) => {
+      const transaction = this.db.transaction([this.storeName], "readwrite");
+      // Do something when all the data is added to the database.
+      transaction.oncomplete = (event) => {
+        console.log("write done.", event);
+        res(event);
+      };
+      transaction.onerror = (event) => {
+        // Don't forget to handle errors!
+        rej("could not write to database");
+      };
+      const objectStore = transaction.objectStore(this.storeName);
+      data.forEach((customer) => {
+        const request = objectStore.add(customer);
+        request.onsuccess = (event) => {
+          // event.target.result === customer.ssn;
+          console.log("added element", event.target.result);
+        };
+      });
+    });
+  };
+  const remove = async (query) => {
+    return new Promise((res, rej) => {
+      const request = this.db
+        .transaction([this.storeName], "readwrite")
+        .objectStore([this.storeName])
+        .delete(query);
       request.onsuccess = (event) => {
-        // event.target.result === customer.ssn;
-        console.log("added " + JSON.stringify(event.target.result));
+        // It's gone!
+        res(event);
+      };
+      request.onerror = (event) => {
+        rej("could not delete element from db", event);
       };
     });
   };
-  const getAll = (cb) => {
-    const transaction = this.db.transaction([this.storeName], "readwrite");
-    return (transaction.objectStore(this.storeName).getAll().onsuccess = (
-      event
-    ) => {
-      console.log(`Got all results`, event.target.result);
-      cb(event.target.result);
+  const prune = async () => {
+    let allElements = await getAll();
+    return Promise.all(
+      allElements.map((element) => remove(element[this.options.keyPath]))
+    );
+  };
+  const destroy = async () => {
+    return new Promise((res, rej) => {
+      const req = window.indexedDB.deleteDatabase(this.dbName);
+      req.onsuccess = () => {
+        res(this.dbName);
+      };
+      req.onerror = () => {
+        rej("couldn't delete database");
+      };
+      req.onblocked = (event) => {
+        console.log("database is blocked... forcing close: ", event);
+        this.db.close();
+        destroy();
+      };
+    });
+  };
+  const getAll = () => {
+    return new Promise((res, rej) => {
+      const transaction = this.db.transaction([this.storeName], "readwrite");
+      let getAllRequest = transaction.objectStore(this.storeName).getAll();
+      getAllRequest.onsuccess = (event) => {
+        console.log(`got all db elements`, event.target.result);
+        res(event.target.result);
+      };
+      getAllRequest.onerror = (event) => {
+        rej("could not retrieve all elements");
+      };
     });
   };
   return {
     open,
     write,
     getAll,
+    prune,
+    destroy,
   };
 }
+
 export default Store;

@@ -1,3 +1,10 @@
+Create a the ``src/extensions/chrome-extension-boilerplate-react-vite-main/.env`` file containing the
+environment variables:
+
+````bash
+echo "VITE_EXTENSIONPAY_ID=<myextensionid>" > .env
+````
+
 ### Develop
 
 1. ``npm run dev``
