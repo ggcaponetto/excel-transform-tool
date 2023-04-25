@@ -4,6 +4,7 @@ import { Typography, Button } from "@mui/material";
 import API from "../api/API";
 import axios from "axios";
 import * as process from "process";
+import ETT from "../ett/ETT";
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
 async function getUser() {
@@ -52,7 +53,8 @@ const Home = () => {
     if (isLoading) {
       return <div>loading...</div>;
     } else if (user && user.paid) {
-      return (
+      return <ETT />;
+      /*return (
         <div>
           <div>all good, you paid. here is your reward.</div>
           <Button
@@ -95,17 +97,12 @@ const Home = () => {
             PRIVATE ENDPOINT
           </Button>
         </div>
-      );
+      );*/
     } else {
       return <Button onClick={extpay.openPaymentPage}>pay now</Button>;
     }
   };
-  return (
-    <div className="Home">
-      <Typography>Welcome {JSON.stringify(process.env)}</Typography>
-      {renderPaymentStatus(user)}
-    </div>
-  );
+  return <div className="Home">{renderPaymentStatus(user)}</div>;
 };
 
 export default Home;

@@ -24,7 +24,8 @@
     "dotenv": "^16.0.3",
     "extpay": "^3.0.7",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.19.3/xlsx-0.19.3.tgz"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.5.0",

@@ -1,3 +1,7 @@
+### Develop
+
+1. ``npm run dev``
+
 ### Debug
 
 1. Right click on popup and open inspector. Set breakpoints in source tab. 
