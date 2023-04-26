@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import Store from "./store";
 import TextField from "@mui/material/TextField";
 
-const store = new Store("ett-plugin", "ett-functions", {
+const store = new Store("ett-sample", "ett-sample", {
   keyPath: "id",
 });
 const FunctionStore = () => {

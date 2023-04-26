@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import "@pages/popup/Popup.css";
 import Home from "@pages/popup/components/home/Home";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
-
+import PopupContext from "./components/context/popup-context";
+import { themes } from "@pages/popup/components/settings/Settings";
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -16,17 +17,28 @@ const lightTheme = createTheme({
 });
 
 function MUITheme(props) {
+  const [theme, setTheme] = useState(themes.dark);
   return (
-    <ThemeProvider theme={darkTheme}>
-      {/* The css baseline adds a black background to the body. We don't want that. */}
-      <ScopedCssBaseline style={{ height: "100%" }}>
-        {/* eslint-disable-next-line react/prop-types */}
-        {props.children}
-      </ScopedCssBaseline>
-    </ThemeProvider>
+    <PopupContext.Provider
+      value={{
+        setTheme: (newTheme) => {
+          console.log("setting theme to", newTheme);
+          setTheme(newTheme);
+        },
+      }}
+    >
+      <ThemeProvider theme={theme.name === "dark" ? darkTheme : lightTheme}>
+        {/* The css baseline adds a black background to the body. We don't want that. */}
+        <ScopedCssBaseline style={{ height: "100%" }}>
+          {/* eslint-disable-next-line react/prop-types */}
+          {props.children}
+        </ScopedCssBaseline>
+      </ThemeProvider>
+    </PopupContext.Provider>
   );
 }
-const Popup = () => {
+
+function Popup() {
   return (
     <div className="App" style={{ padding: 0 }}>
       <MUITheme>
@@ -34,6 +46,6 @@ const Popup = () => {
       </MUITheme>
     </div>
   );
-};
+}
 
 export default Popup;

@@ -31,7 +31,11 @@ function Store(dbName, storeName, options) {
     });
   };
   const write = (data) => {
-    console.log("writing to db", this.db);
+    console.log("writing to db", {
+      storeName: this.storeName,
+      dbName: this.dbName,
+      data,
+    });
     return new Promise((res, rej) => {
       const transaction = this.db.transaction([this.storeName], "readwrite");
       // Do something when all the data is added to the database.
@@ -41,11 +45,12 @@ function Store(dbName, storeName, options) {
       };
       transaction.onerror = (event) => {
         // Don't forget to handle errors!
+        console.error("could not write to database", event);
         rej("could not write to database");
       };
       const objectStore = transaction.objectStore(this.storeName);
       data.forEach((customer) => {
-        const request = objectStore.add(customer);
+        const request = objectStore.put(customer);
         request.onsuccess = (event) => {
           // event.target.result === customer.ssn;
           console.log("added element", event.target.result);
@@ -70,9 +75,11 @@ function Store(dbName, storeName, options) {
   };
   const prune = async () => {
     let allElements = await getAll();
-    return Promise.all(
-      allElements.map((element) => remove(element[this.options.keyPath]))
-    );
+    if (allElements) {
+      return Promise.all(
+        allElements.map((element) => remove(element[this.options.keyPath]))
+      );
+    }
   };
   const destroy = async () => {
     return new Promise((res, rej) => {
@@ -94,6 +101,9 @@ function Store(dbName, storeName, options) {
   };
   const getAll = () => {
     return new Promise((res, rej) => {
+      if (this.db === null) {
+        rej("no indexed db available");
+      }
       const transaction = this.db.transaction([this.storeName], "readwrite");
       let getAllRequest = transaction.objectStore(this.storeName).getAll();
       getAllRequest.onsuccess = (event) => {
