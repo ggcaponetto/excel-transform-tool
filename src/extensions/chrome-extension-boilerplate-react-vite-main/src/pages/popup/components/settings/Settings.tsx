@@ -6,9 +6,12 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import PopupContext from "@pages/popup/components/context/popup-context";
 import * as log from "loglevel";
+import "./Settins.css";
+import Divider from "@mui/material/Divider";
 const ll = log.getLogger("Settings.tsx");
 
 import process from "process";
+import FnStore from "@pages/popup/components/fn-store/FnStore";
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -102,6 +105,9 @@ const Settings = () => {
           Light
         </FormGroup>
       </div>
+      <Divider />
+      <Typography variant={"h6"}>Excel Functions</Typography>
+      <FnStore />
     </div>
   );
 };

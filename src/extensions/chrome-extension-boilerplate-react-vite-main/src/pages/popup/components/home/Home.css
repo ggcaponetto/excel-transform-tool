@@ -1,0 +1,16 @@
+.Home{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+.Home > .MuiBox-root{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+}
+.Home > .MuiBox-root > .MuiBox-root{
+    display: flex;
+    flex-direction: column;
+}

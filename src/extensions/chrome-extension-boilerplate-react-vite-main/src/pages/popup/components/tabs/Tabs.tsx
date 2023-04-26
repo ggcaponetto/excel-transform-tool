@@ -3,7 +3,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-
+import "./Tabs.css";
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -21,11 +21,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 0 }}>{children}</Box>}
     </div>
   );
 }
@@ -60,6 +56,7 @@ export default function BasicTabs(props) {
                   key={JSON.stringify({ title, titleIndex })}
                   label={title}
                   {...a11yProps(titleIndex)}
+                  className={"custom-tab-title"}
                 />
               );
             });
@@ -71,7 +68,8 @@ export default function BasicTabs(props) {
           return (
             <div
               key={JSON.stringify(component, componentIndex)}
-              style={{ display: value === componentIndex ? "block" : "none" }}
+              className={"custom-tab"}
+              style={{ display: value === componentIndex ? "flex" : "none" }}
             >
               <TabPanel value={componentIndex} index={componentIndex}>
                 {component}

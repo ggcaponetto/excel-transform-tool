@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import ExtPay from "extpay";
-import { Typography, Button } from "@mui/material";
+import { Typography, Button, LinearProgress } from "@mui/material";
 import API from "../api/API";
 import axios from "axios";
+import "./Home.css";
 import * as process from "process";
 import ETT from "../ett/ETT";
 import Settings from "../settings/Settings";
@@ -62,7 +63,7 @@ const Home = () => {
   }, []);
   const renderPaymentStatus = (user) => {
     if (isLoading) {
-      return <div>loading...</div>;
+      return <LinearProgress></LinearProgress>;
     } else if (user && user.paid) {
       return (
         <BasicTabs

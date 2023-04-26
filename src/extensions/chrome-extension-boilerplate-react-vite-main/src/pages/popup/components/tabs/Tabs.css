@@ -1,0 +1,23 @@
+.Home > .MuiBox-root .custom-tab{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.Home > .MuiBox-root .custom-tab{
+    height: 100%;
+    overflow: auto;
+}
+
+.Home > .MuiBox-root .custom-tab > div{
+    height: 100%;
+}
+.Home > .MuiBox-root .custom-tab > div > div{
+    height: 100%;
+}
+.Home > .MuiBox-root .custom-tab > div > div > p{
+    height: 100%;
+}
+.Home > .MuiBox-root .custom-tab > div > div > p > div{
+    height: 100%;
+}

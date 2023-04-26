@@ -1,0 +1,9 @@
+.Settings {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.Settings div {
+    display: flex;
+    flex-direction: column;
+}
