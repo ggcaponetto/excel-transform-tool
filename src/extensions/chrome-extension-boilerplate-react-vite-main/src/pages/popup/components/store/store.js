@@ -85,8 +85,10 @@ function Store(dbName, storeName, options) {
       };
       req.onblocked = (event) => {
         console.log("database is blocked... forcing close: ", event);
-        this.db.close();
-        destroy();
+        if (this.db) {
+          this.db.close();
+          destroy();
+        }
       };
     });
   };
@@ -103,12 +105,29 @@ function Store(dbName, storeName, options) {
       };
     });
   };
+  const get = (query) => {
+    return new Promise((res, rej) => {
+      const transaction = this.db.transaction([this.storeName], "readwrite");
+      const objectStore = transaction.objectStore(this.storeName);
+      const request = objectStore.get(query);
+      request.onerror = (event) => {
+        // Handle errors!
+        console.error("could not retrieve element", request.result);
+        rej("could not get element via query", query);
+      };
+      request.onsuccess = (event) => {
+        console.log("retrieved element", request.result);
+        res(request.result);
+      };
+    });
+  };
   return {
     open,
     write,
     getAll,
     prune,
     destroy,
+    get,
   };
 }
 

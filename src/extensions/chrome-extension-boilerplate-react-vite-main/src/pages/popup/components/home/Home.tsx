@@ -5,6 +5,7 @@ import API from "../api/API";
 import axios from "axios";
 import * as process from "process";
 import ETT from "../ett/ETT";
+import Settings from "../settings/Settings";
 import BasicTabs from "@pages/popup/components/tabs/Tabs";
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
@@ -56,16 +57,10 @@ const Home = () => {
     } else if (user && user.paid) {
       return (
         <BasicTabs
-          titles={{
-            0: <div>introduction</div>,
-            1: <div>tranform</div>,
-            2: <div>settings</div>,
-          }}
-          components={{
-            0: <div>introduction</div>,
-            1: <ETT />,
-            2: <div>settings</div>,
-          }}
+          // eslint-disable-next-line react/jsx-key
+          titles={[<div>tranform</div>, <div>settings</div>]}
+          // eslint-disable-next-line react/jsx-key
+          components={[<ETT />, <Settings />]}
         />
       );
       /*return (

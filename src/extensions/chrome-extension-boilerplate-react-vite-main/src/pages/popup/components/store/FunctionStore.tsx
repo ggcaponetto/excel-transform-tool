@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import Store from "./store";
+import TextField from "@mui/material/TextField";
 
 const store = new Store("ett-plugin", "ett-functions", {
   keyPath: "id",
 });
 const FunctionStore = () => {
+  const [getValue, setGetValue] = useState("hello");
   useEffect(() => {
     console.log("FunctionStore initialized.", store);
   }, []);
@@ -18,8 +20,8 @@ const FunctionStore = () => {
   const onAdd = async () => {
     await store.write([
       {
-        id: Math.random(),
-        value: Math.random(),
+        id: Math.random().toString(),
+        value: Math.random().toString(),
       },
     ]);
   };
@@ -41,6 +43,10 @@ const FunctionStore = () => {
         console.log("could not destroy database", e);
       });
   };
+  const onGet = async () => {
+    const element = await store.get(getValue);
+    console.log("got element", element);
+  };
   return (
     <div className="FunctionStore">
       <div>
@@ -57,6 +63,21 @@ const FunctionStore = () => {
       </div>
       <div>
         <Button onClick={onGetAll}>getall</Button>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Button onClick={onGet}>onGet</Button>
+        <TextField
+          value={getValue}
+          onChange={(event) => {
+            setGetValue(event.target.value);
+          }}
+        />
       </div>
     </div>
   );

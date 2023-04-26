@@ -53,26 +53,33 @@ export default function BasicTabs(props) {
           onChange={handleChange}
           aria-label="basic tabs example"
         >
-          {/* eslint-disable-next-line react/prop-types */}
-          <Tab label={props.titles[0]} {...a11yProps(0)} />
-          {/* eslint-disable-next-line react/prop-types */}
-          <Tab label={props.titles[1]} {...a11yProps(1)} />
-          {/* eslint-disable-next-line react/prop-types */}
-          <Tab label={props.titles[2]} {...a11yProps(2)} />
+          {(() => {
+            return props.titles.map((title, titleIndex) => {
+              return (
+                <Tab
+                  key={JSON.stringify({ title, titleIndex })}
+                  label={title}
+                  {...a11yProps(titleIndex)}
+                />
+              );
+            });
+          })()}
         </Tabs>
       </Box>
-      <TabPanel value={value} index={0}>
-        {/* eslint-disable-next-line react/prop-types */}
-        {props.components[0]}
-      </TabPanel>
-      <TabPanel value={value} index={1}>
-        {/* eslint-disable-next-line react/prop-types */}
-        {props.components[1]}
-      </TabPanel>
-      <TabPanel value={value} index={2}>
-        {/* eslint-disable-next-line react/prop-types */}
-        {props.components[2]}
-      </TabPanel>
+      {(() => {
+        return props.components.map((component, componentIndex) => {
+          return (
+            <div
+              key={JSON.stringify(component, componentIndex)}
+              style={{ display: value === componentIndex ? "block" : "none" }}
+            >
+              <TabPanel value={componentIndex} index={componentIndex}>
+                {component}
+              </TabPanel>
+            </div>
+          );
+        });
+      })()}
     </Box>
   );
 }
