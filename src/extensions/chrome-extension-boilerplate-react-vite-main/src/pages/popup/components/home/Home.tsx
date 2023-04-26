@@ -7,7 +7,15 @@ import * as process from "process";
 import ETT from "../ett/ETT";
 import Settings from "../settings/Settings";
 import BasicTabs from "@pages/popup/components/tabs/Tabs";
+import * as log from "loglevel";
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
+
+const isLogsEnabled = false;
+if (process.env.VITE_ENV === "development" && isLogsEnabled) {
+  log.setLevel(log.levels.DEBUG);
+} else {
+  log.setLevel(log.levels.WARN);
+}
 
 async function getUser() {
   const user = await extpay.getUser();
@@ -39,7 +47,7 @@ const Home = () => {
 
   useEffect(() => {
     if (user) {
-      console.log("user changed", user);
+      log.debug("user changed", user);
     }
   }, [user]);
 
@@ -69,7 +77,7 @@ const Home = () => {
           <Button
             onClick={async () => {
               chrome.runtime.sendMessage({ greeting: "hello" }, (response) => {
-                console.log("got message back", response);
+                log.debug("got message back", response);
               });
             }}
           >
@@ -87,7 +95,7 @@ const Home = () => {
                     greeting: "hello",
                   });
                   // do something with response here, not outside the function
-                  console.log(
+                  log.debug(
                     "got back response from content script: ",
                     response
                   );
@@ -100,7 +108,7 @@ const Home = () => {
           <Button
             onClick={async () => {
               const myDataResponse = await API.makeRequest({ hello: "world" });
-              console.log("got response form private endpoint", myDataResponse);
+              log.debug("got response form private endpoint", myDataResponse);
             }}
           >
             PRIVATE ENDPOINT

@@ -6,9 +6,14 @@ import axios from "axios";
 import Input from "@mui/material/Input";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
 import FunctionStore from "@pages/popup/components/store/FunctionStore";
-/* load the codepage support library for extended support with older formats  */
-/*import * as cptable from "xlsx/dist/cpexcel.full.mjs";
-set_cptable(cptable);*/
+import * as log from "loglevel";
+import process from "process";
+const isLogsEnabled = false;
+if (process.env.VITE_ENV === "development" && isLogsEnabled) {
+  log.setLevel(log.levels.DEBUG);
+} else {
+  log.setLevel(log.levels.WARN);
+}
 
 const ETT = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -18,16 +23,16 @@ const ETT = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    console.log("ETT initialized.", workbook);
+    log.debug("ETT initialized.", workbook);
   }, []);
 
   useEffect(() => {
-    console.log("workbook created from upload", workbook);
+    log.debug("workbook created from upload", workbook);
   }, [workbook]);
 
   useEffect(() => {
     if (uploadEvent) {
-      console.log(
+      log.debug(
         `upload event changed. got file ${uploadEvent.target.files[0].name}`,
         uploadEvent
       );
@@ -47,16 +52,16 @@ const ETT = () => {
     /* Iterate all sheets */
     Object.keys(workbook.Sheets).forEach((sheetName) => {
       const sheet = workbook.Sheets[sheetName];
-      console.log(`processing sheet ${sheetName}`, sheet);
+      log.debug(`processing sheet ${sheetName}`, sheet);
       const range = XLSX.utils.decode_range(sheet["!ref"]);
-      console.log("row count is", range.e.r);
-      console.log("column count is", range.e.c);
+      log.debug("row count is", range.e.r);
+      log.debug("column count is", range.e.c);
 
       /* Clone this worksheet with the transformations */
       const clonedWorksheet = JSON.parse(JSON.stringify(sheet)); // make a copy of the object
       XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
     });
-    console.log("New workbook is", newWorkbook);
+    log.debug("New workbook is", newWorkbook);
     callback(newWorkbook);
   }
   return (

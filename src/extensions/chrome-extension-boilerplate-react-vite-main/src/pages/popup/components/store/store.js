@@ -1,3 +1,13 @@
+import * as log from "loglevel";
+import process from "process";
+
+const isLogsEnabled = false;
+if (process.env.VITE_ENV === "development" && isLogsEnabled) {
+  log.setLevel(log.levels.DEBUG);
+} else {
+  log.setLevel(log.levels.WARN);
+}
+
 function Store(dbName, storeName, options) {
   this.dbName = dbName;
   this.storeName = storeName;
@@ -9,7 +19,7 @@ function Store(dbName, storeName, options) {
     return new Promise((res, rej) => {
       const request = window.indexedDB.open(this.dbName, 2);
       request.onupgradeneeded = (event) => {
-        console.log(`db load: onupgradeneeded`, {
+        log.debug(`db load: onupgradeneeded`, {
           event,
         });
         // Save the IDBDatabase interface
@@ -20,7 +30,7 @@ function Store(dbName, storeName, options) {
       };
       request.onsuccess = (event) => {
         this.db = event.target.result;
-        console.log(`db load: onsuccedd`, {
+        log.debug(`db load: onsuccedd`, {
           db: this.db,
         });
         res(this.db);
@@ -31,7 +41,7 @@ function Store(dbName, storeName, options) {
     });
   };
   const write = (data) => {
-    console.log("writing to db", {
+    log.debug("writing to db", {
       storeName: this.storeName,
       dbName: this.dbName,
       data,
@@ -40,7 +50,7 @@ function Store(dbName, storeName, options) {
       const transaction = this.db.transaction([this.storeName], "readwrite");
       // Do something when all the data is added to the database.
       transaction.oncomplete = (event) => {
-        console.log("write done.", event);
+        log.debug("write done.", event);
         res(event);
       };
       transaction.onerror = (event) => {
@@ -53,7 +63,7 @@ function Store(dbName, storeName, options) {
         const request = objectStore.put(customer);
         request.onsuccess = (event) => {
           // event.target.result === customer.ssn;
-          console.log("added element", event.target.result);
+          log.debug("added element", event.target.result);
         };
       });
     });
@@ -91,7 +101,7 @@ function Store(dbName, storeName, options) {
         rej("couldn't delete database");
       };
       req.onblocked = (event) => {
-        console.log("database is blocked... forcing close: ", event);
+        log.debug("database is blocked... forcing close: ", event);
         if (this.db) {
           this.db.close();
           destroy();
@@ -107,7 +117,7 @@ function Store(dbName, storeName, options) {
       const transaction = this.db.transaction([this.storeName], "readwrite");
       let getAllRequest = transaction.objectStore(this.storeName).getAll();
       getAllRequest.onsuccess = (event) => {
-        console.log(`got all db elements`, event.target.result);
+        log.debug(`got all db elements`, event.target.result);
         res(event.target.result);
       };
       getAllRequest.onerror = (event) => {
@@ -126,7 +136,7 @@ function Store(dbName, storeName, options) {
         rej("could not get element via query", query);
       };
       request.onsuccess = (event) => {
-        console.log("retrieved element", request.result);
+        log.debug("retrieved element", request.result);
         res(request.result);
       };
     });

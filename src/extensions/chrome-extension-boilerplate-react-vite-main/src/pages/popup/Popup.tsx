@@ -5,6 +5,16 @@ import { ThemeProvider, createTheme } from "@mui/material/styles";
 import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
 import PopupContext from "./components/context/popup-context";
 import { themes } from "@pages/popup/components/settings/Settings";
+import * as log from "loglevel";
+import process from "process";
+
+const isLogsEnabled = true;
+if (process.env.VITE_ENV === "development" && isLogsEnabled) {
+  log.setLevel(log.levels.DEBUG);
+} else {
+  log.setLevel(log.levels.WARN);
+}
+
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
@@ -22,7 +32,7 @@ function MUITheme(props) {
     <PopupContext.Provider
       value={{
         setTheme: (newTheme) => {
-          console.log("setting theme to", newTheme);
+          log.debug("setting theme to", newTheme);
           setTheme(newTheme);
         },
       }}

@@ -2,6 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
 import Store from "./store";
 import TextField from "@mui/material/TextField";
+import * as log from "loglevel";
+import process from "process";
+
+const isLogsEnabled = false;
+if (process.env.VITE_ENV === "development" && isLogsEnabled) {
+  log.setLevel(log.levels.DEBUG);
+} else {
+  log.setLevel(log.levels.WARN);
+}
 
 const store = new Store("ett-sample", "ett-sample", {
   keyPath: "id",
@@ -9,11 +18,11 @@ const store = new Store("ett-sample", "ett-sample", {
 const FunctionStore = () => {
   const [getValue, setGetValue] = useState("hello");
   useEffect(() => {
-    console.log("FunctionStore initialized.", store);
+    log.debug("FunctionStore initialized.", store);
   }, []);
   const onOpen = async () => {
     const db = await store.open((objectStore) => {
-      console.log("creating index 'value'");
+      log.debug("creating index 'value'");
       objectStore.createIndex("value", "value", { unique: false });
     });
   };
@@ -27,25 +36,25 @@ const FunctionStore = () => {
   };
   const onGetAll = async () => {
     const all = await store.getAll();
-    console.log("all elements", all);
+    log.debug("all elements", all);
   };
   const onPrune = async () => {
     const all = await store.prune();
-    console.log("pruned database");
+    log.debug("pruned database");
   };
   const onDestroy = async () => {
     await store
       .destroy()
       .then((res) => {
-        console.log("destroyed database", res);
+        log.debug("destroyed database", res);
       })
       .catch((e) => {
-        console.log("could not destroy database", e);
+        log.debug("could not destroy database", e);
       });
   };
   const onGet = async () => {
     const element = await store.get(getValue);
-    console.log("got element", element);
+    log.debug("got element", element);
   };
   return (
     <div className="FunctionStore">
