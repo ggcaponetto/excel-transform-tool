@@ -1,3 +1,14 @@
+Create a the ``src/extensions/chrome-extension-boilerplate-react-vite-main/.env`` file containing the
+environment variables:
+
+````bash
+echo "VITE_EXTENSIONPAY_ID=<myextensionid>" > .env
+````
+
+### Develop
+
+1. ``npm run dev``
+
 ### Debug
 
 1. Right click on popup and open inspector. Set breakpoints in source tab. 
