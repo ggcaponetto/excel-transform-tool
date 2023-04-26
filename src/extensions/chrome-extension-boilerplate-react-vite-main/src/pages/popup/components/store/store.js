@@ -1,11 +1,13 @@
-import * as log from "loglevel";
 import process from "process";
+
+import * as log from "loglevel";
+const ll = log.getLogger("store.js");
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
-  log.setLevel(log.levels.DEBUG);
+  ll.setLevel(log.levels.DEBUG);
 } else {
-  log.setLevel(log.levels.WARN);
+  ll.setLevel(log.levels.WARN);
 }
 
 function Store(dbName, storeName, options) {
@@ -19,7 +21,7 @@ function Store(dbName, storeName, options) {
     return new Promise((res, rej) => {
       const request = window.indexedDB.open(this.dbName, 2);
       request.onupgradeneeded = (event) => {
-        log.debug(`db load: onupgradeneeded`, {
+        ll.log(`db load: onupgradeneeded`, {
           event,
         });
         // Save the IDBDatabase interface
@@ -30,7 +32,7 @@ function Store(dbName, storeName, options) {
       };
       request.onsuccess = (event) => {
         this.db = event.target.result;
-        log.debug(`db load: onsuccedd`, {
+        ll.log(`db load: onsuccedd`, {
           db: this.db,
         });
         res(this.db);
@@ -41,7 +43,7 @@ function Store(dbName, storeName, options) {
     });
   };
   const write = (data) => {
-    log.debug("writing to db", {
+    ll.log("writing to db", {
       storeName: this.storeName,
       dbName: this.dbName,
       data,
@@ -50,12 +52,12 @@ function Store(dbName, storeName, options) {
       const transaction = this.db.transaction([this.storeName], "readwrite");
       // Do something when all the data is added to the database.
       transaction.oncomplete = (event) => {
-        log.debug("write done.", event);
+        ll.log("write done.", event);
         res(event);
       };
       transaction.onerror = (event) => {
         // Don't forget to handle errors!
-        console.error("could not write to database", event);
+        ll.error("could not write to database", event);
         rej("could not write to database");
       };
       const objectStore = transaction.objectStore(this.storeName);
@@ -63,7 +65,7 @@ function Store(dbName, storeName, options) {
         const request = objectStore.put(customer);
         request.onsuccess = (event) => {
           // event.target.result === customer.ssn;
-          log.debug("added element", event.target.result);
+          ll.log("added element", event.target.result);
         };
       });
     });
@@ -101,7 +103,7 @@ function Store(dbName, storeName, options) {
         rej("couldn't delete database");
       };
       req.onblocked = (event) => {
-        log.debug("database is blocked... forcing close: ", event);
+        ll.log("database is blocked... forcing close: ", event);
         if (this.db) {
           this.db.close();
           destroy();
@@ -117,7 +119,7 @@ function Store(dbName, storeName, options) {
       const transaction = this.db.transaction([this.storeName], "readwrite");
       let getAllRequest = transaction.objectStore(this.storeName).getAll();
       getAllRequest.onsuccess = (event) => {
-        log.debug(`got all db elements`, event.target.result);
+        ll.log(`got all db elements`, event.target.result);
         res(event.target.result);
       };
       getAllRequest.onerror = (event) => {
@@ -132,11 +134,11 @@ function Store(dbName, storeName, options) {
       const request = objectStore.get(query);
       request.onerror = (event) => {
         // Handle errors!
-        console.error("could not retrieve element", request.result);
+        ll.error("could not retrieve element", request.result);
         rej("could not get element via query", query);
       };
       request.onsuccess = (event) => {
-        log.debug("retrieved element", request.result);
+        ll.log("retrieved element", request.result);
         res(request.result);
       };
     });

@@ -3,6 +3,15 @@ import ExtPay from "extpay";
 import process from "process";
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
+import * as log from "loglevel";
+const ll = log.getLogger("index.tsx");
+const isLogsEnabled = false;
+if (process.env.VITE_ENV === "development" && isLogsEnabled) {
+  ll.setLevel(log.levels.DEBUG);
+} else {
+  ll.setLevel(log.levels.WARN);
+}
+
 reloadOnUpdate("pages/background");
 
 /**
@@ -11,13 +20,13 @@ reloadOnUpdate("pages/background");
  */
 reloadOnUpdate("pages/content/style.scss");
 
-console.log("background loaded.");
+ll.debug("background loaded.");
 
 extpay.startBackground();
-console.log("extpay started in background.");
+ll.debug("extpay started in background.");
 
 extpay.onPaid.addListener((data) => {
-  console.log("user paid.. reloading the page.", data);
+  ll.debug("user paid.. reloading the page.", data);
   chrome.runtime.sendMessage({
     action: "reload_page",
     data: null,
@@ -25,7 +34,7 @@ extpay.onPaid.addListener((data) => {
 });
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-  console.log(
+  ll.debug(
     sender.tab
       ? "background/index.js got message from a content script: " +
           sender.tab.url
@@ -42,4 +51,4 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   });
 });
 
-console.log("registered event listener.");
+ll.debug("registered event listener.");

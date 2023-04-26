@@ -6,13 +6,15 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import PopupContext from "@pages/popup/components/context/popup-context";
 import * as log from "loglevel";
+const ll = log.getLogger("Settings.tsx");
+
 import process from "process";
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
-  log.setLevel(log.levels.DEBUG);
+  ll.setLevel(log.levels.DEBUG);
 } else {
-  log.setLevel(log.levels.WARN);
+  ll.setLevel(log.levels.WARN);
 }
 
 const store = new Store("ett-settings", "settings", {
@@ -39,12 +41,12 @@ const Settings = () => {
   useEffect(() => {
     (async () => {
       const dbInstance = await store.open((objectStore) => {
-        log.debug("creating store indices for the settings component");
+        ll.debug("creating store indices for the settings component");
         objectStore.createIndex("type", "type", { unique: false });
         objectStore.createIndex("name", "name", { unique: true });
         objectStore.createIndex("value", "value", { unique: false });
       });
-      log.debug("settings have been loaded");
+      ll.debug("settings have been loaded");
       /* get the stored theme setting */
       const storedTheme = await store.get("theme");
       setTheme(storedTheme || defaultTheme);
@@ -52,7 +54,7 @@ const Settings = () => {
     })();
   }, []);
   useEffect(() => {
-    log.debug("theme changes, storing to indexeddb", theme);
+    ll.debug("theme changes, storing to indexeddb", theme);
     (async () => {
       if (theme && db) {
         await store.write([theme]);
@@ -61,7 +63,7 @@ const Settings = () => {
     })();
   }, [theme, db]);
   const onThemeChange = (e) => {
-    log.debug("onThemeChange", e);
+    ll.debug("onThemeChange", e);
     const isChecked = e.target.checked;
     /* store the theme into the settings/localstorage */
     (async () => {
@@ -76,9 +78,7 @@ const Settings = () => {
   };
   return (
     <div className="Settings" style={{ padding: 0 }}>
-      <Typography variant={"h6"}>
-        Theme ({process.env.VITE_ENV ? "true" : "false"})
-      </Typography>
+      <Typography variant={"h6"}>Theme</Typography>
       <div
         style={{
           display: "flex",

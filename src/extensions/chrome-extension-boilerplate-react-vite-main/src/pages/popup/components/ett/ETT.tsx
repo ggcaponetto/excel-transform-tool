@@ -7,12 +7,13 @@ import Input from "@mui/material/Input";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
 import FunctionStore from "@pages/popup/components/store/FunctionStore";
 import * as log from "loglevel";
+const ll = log.getLogger("ETT.tsx");
 import process from "process";
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
-  log.setLevel(log.levels.DEBUG);
+  ll.setLevel(log.levels.DEBUG);
 } else {
-  log.setLevel(log.levels.WARN);
+  ll.setLevel(log.levels.WARN);
 }
 
 const ETT = () => {
@@ -23,16 +24,16 @@ const ETT = () => {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    log.debug("ETT initialized.", workbook);
+    ll.debug("ETT initialized.", workbook);
   }, []);
 
   useEffect(() => {
-    log.debug("workbook created from upload", workbook);
+    ll.debug("workbook created from upload", workbook);
   }, [workbook]);
 
   useEffect(() => {
     if (uploadEvent) {
-      log.debug(
+      ll.debug(
         `upload event changed. got file ${uploadEvent.target.files[0].name}`,
         uploadEvent
       );
@@ -52,16 +53,16 @@ const ETT = () => {
     /* Iterate all sheets */
     Object.keys(workbook.Sheets).forEach((sheetName) => {
       const sheet = workbook.Sheets[sheetName];
-      log.debug(`processing sheet ${sheetName}`, sheet);
+      ll.debug(`processing sheet ${sheetName}`, sheet);
       const range = XLSX.utils.decode_range(sheet["!ref"]);
-      log.debug("row count is", range.e.r);
-      log.debug("column count is", range.e.c);
+      ll.debug("row count is", range.e.r);
+      ll.debug("column count is", range.e.c);
 
       /* Clone this worksheet with the transformations */
       const clonedWorksheet = JSON.parse(JSON.stringify(sheet)); // make a copy of the object
       XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
     });
-    log.debug("New workbook is", newWorkbook);
+    ll.debug("New workbook is", newWorkbook);
     callback(newWorkbook);
   }
   return (
