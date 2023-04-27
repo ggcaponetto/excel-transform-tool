@@ -49,27 +49,30 @@ export default function ExcelProcessor(context, workbook) {
         Object.keys(sheet)
           .filter((cellName) => !cellName.startsWith("!"))
           .forEach((cellName) => {
-            cellCounter++;
-            let cell = splitCell(cellName);
-            let totalRows = getRange(sheet).e.r + 1;
-            let totalColumns = getRange(sheet).e.c + 1;
-            let totalCells = totalRows * totalColumns;
-            let currentRow = cell.row;
-            let progress = totalCells / cellCounter;
-            ll.debug(
-              `processing cell ${cellName} rows: ${currentRow}/${totalRows}, cell: ${cellCounter}/${totalCells}`,
-              {
-                totalRows,
-                currentRow,
-                workbook: this.workbook,
+            (async () => {
+              cellCounter++;
+              let cell = splitCell(cellName);
+              let totalRows = getRange(sheet).e.r + 1;
+              let totalColumns = getRange(sheet).e.c + 1;
+              let totalCells = totalRows * totalColumns;
+              let currentRow = cell.row;
+              let progress = cellCounter / totalCells;
+              ll.debug(
+                `processing cell ${cellName} rows: ${currentRow}/${totalRows}, cell: ${cellCounter}/${totalCells}`,
+                {
+                  totalRows,
+                  currentRow,
+                  workbook: this.workbook,
+                  cellName,
+                  cell,
+                }
+              );
+              await new Promise((res) => setTimeout(res, 100));
+              onProgress({
+                progress,
                 cellName,
-                cell,
-              }
-            );
-            onProgress({
-              progress,
-              cellName,
-            });
+              });
+            })();
           });
       });
       setTimeout(() => {

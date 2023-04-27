@@ -68,11 +68,11 @@ const ETT = () => {
       ll.debug("New workbook is", newWorkbook);
       const processor = new ExcelProcessor({}, newWorkbook);
       const processedWorkbook = await processor.processWorkbook((update) => {
-        const progress = update;
+        ll.debug("Got processing update", update);
         setStatus((p) => {
           return {
             ...p,
-            value: progress,
+            value: update.progress,
           };
         });
       });
