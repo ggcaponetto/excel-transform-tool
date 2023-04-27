@@ -35,8 +35,8 @@ const defaultFunction = createData(
   "New Function",
   "My new function",
   `
-  function processRow(){
-    alert("hello world")
+  function processCell(){
+    return "hello world!";
   }
   `
 );
@@ -181,10 +181,10 @@ export function CollapsibleTable(props) {
   );
 }
 
-const store = new Store("ett-functions", "functions", {
+export const store = new Store("ett-functions", "functions", {
   keyPath: "name",
 });
-const storeIndices = [
+export const storeIndices = [
   {
     name: "name",
     unique: false,
@@ -210,7 +210,6 @@ const FnStore = () => {
       });
     });
     ll.debug("functions have been loaded");
-    /* get the stored theme setting */
     const functions = await store.getAll();
     setExcelFunctions(functions);
   };

@@ -1,4 +1,4 @@
-console.log("loaded PageBride.js for DOM manipulations");
+console.log("loaded PageBridge.js for DOM manipulations");
 
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log(
@@ -11,10 +11,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       sendResponse,
     }
   );
+  const evalResult = eval("function run(){return 99} run()");
   if (request.greeting === "hello")
     sendResponse({
       type: "processed_by_page_bridge",
       data: request,
+      evalResult,
     });
 });
 export default {};

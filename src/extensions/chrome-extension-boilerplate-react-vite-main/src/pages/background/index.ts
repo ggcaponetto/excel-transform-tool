@@ -5,7 +5,7 @@ const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
 import * as log from "loglevel";
 const ll = log.getLogger("index.tsx");
-const isLogsEnabled = false;
+const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
 } else {
@@ -47,7 +47,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   );
   sendResponse({
     type: "processed_by_background",
-    data: { farewell: "goodbye" },
+    data: {
+      farewell: "goodbye",
+    },
   });
 });
 

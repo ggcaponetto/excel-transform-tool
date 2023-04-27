@@ -3,6 +3,8 @@ import * as log from "loglevel";
 const ll = log.getLogger("FnStore");
 import process from "process";
 import XLSX from "xlsx";
+import Store from "../store/store";
+import storeIndices from "./../fn-store/FnStore";
 
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -10,9 +12,28 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 } else {
   ll.setLevel(log.levels.WARN);
 }
+
+const store = new Store("ett-functions", "functions", {
+  keyPath: "name",
+});
 export default function ExcelProcessor(context, workbook) {
   this.context = context;
   this.workbook = workbook;
+  this.store = store;
+  this.functions = null;
+  const init = async () => {
+    const dbInstance = await this.store.open((objectStore) => {
+      ll.debug("creating store indices for the functions component");
+      storeIndices.forEach((index) => {
+        objectStore.createIndex(index.name, index.name, {
+          unique: index.unique,
+        });
+      });
+    });
+    /* get the stored functions */
+    this.functions = await store.getAll();
+    ll.debug("functions have been loaded", this.functions);
+  };
   const getRange = (sheet) => {
     const range = XLSX.utils.decode_range(sheet["!ref"]);
     // ll.debug("row count is", range.e.r);
@@ -45,16 +66,25 @@ export default function ExcelProcessor(context, workbook) {
     }
     return totalCellCount;
   };
-  const evalCode = (code) => {
+  const evalInContext = (context, code) => {
     ll.debug("evaluating code", {
+      context,
       code,
-      workbook: this.workbook,
     });
+    function evalInContext() {
+      eval(`
+        ${code}
+        return processCell();
+      `);
+    }
+    evalInContext.call(context);
   };
-  const processWorkbook = (onProgress) => {
+  const getFunctions = () => this.functions;
+  const processWorkbook = (functions, onProgress) => {
     return new Promise((resolveProcessing) => {
       ll.debug("processing workbook...", {
         workbook: this.workbook,
+        functions,
       });
 
       let workPromises = [];
@@ -75,16 +105,18 @@ export default function ExcelProcessor(context, workbook) {
               new Promise((res) => {
                 setTimeout(() => {
                   // https://docs.sheetjs.com/docs/solutions/processing
-                  XLSX.utils.sheet_add_aoa(
-                    this.workbook.Sheets[sheetName],
-                    [
-                      [
-                        this.workbook.Sheets[sheetName][cellName].w +
-                          " (something else)",
-                      ],
-                    ],
-                    { origin: cellName }
-                  );
+                  const evalContext = {
+                    cell: this.workbook.Sheets[sheetName][cellName].w,
+                  };
+                  functions.forEach((func) => {
+                    let evalResult = evalInContext(evalContext, func.data);
+                    ll.debug("eval result: ", evalResult);
+                    XLSX.utils.sheet_add_aoa(
+                      this.workbook.Sheets[sheetName],
+                      [[evalResult]],
+                      { origin: cellName }
+                    );
+                  });
                   res(cellName);
                 }, ms);
               })
@@ -120,7 +152,9 @@ export default function ExcelProcessor(context, workbook) {
     });
   };
   return {
-    evalCode,
+    init,
+    evalInContext,
     processWorkbook,
+    getFunctions,
   };
 }

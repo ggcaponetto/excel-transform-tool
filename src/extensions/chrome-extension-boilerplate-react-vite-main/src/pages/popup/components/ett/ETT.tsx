@@ -6,6 +6,11 @@ import * as log from "loglevel";
 import ExcelProcessor from "./../process/ExcelProcessor";
 const ll = log.getLogger("ETT");
 import process from "process";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -22,6 +27,10 @@ const ETT = () => {
   const [uploadEvent, setUploadEvent] = useState(null);
   const [workbook, setWorkbook] = useState(null);
   const [processedWorkbook, setProcessedWorkbook] = useState(null);
+  const [processor, setProcessor] = useState(null);
+  const [functions, setFunctions] = useState(null);
+  const [selectedFunction, setSelectedFunction] = useState(null);
+
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -29,7 +38,17 @@ const ETT = () => {
   }, []);
 
   useEffect(() => {
+    ll.debug("functions changed", functions);
+  }, [functions]);
+
+  useEffect(() => {
     ll.debug("workbook created from upload", workbook);
+    (async () => {
+      const newProcessor = new ExcelProcessor({}, workbook);
+      await newProcessor.init();
+      setProcessor(newProcessor);
+      setFunctions(newProcessor.getFunctions());
+    })();
   }, [workbook]);
 
   useEffect(() => {
@@ -47,7 +66,7 @@ const ETT = () => {
     }
   }, [uploadEvent]);
 
-  async function process(workbook) {
+  async function process(workbook, functionsArray) {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       /* Create a new workbook */
@@ -67,8 +86,8 @@ const ETT = () => {
         XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
       });
       ll.debug("New workbook is", newWorkbook);
-      const processor = new ExcelProcessor({}, newWorkbook);
       const newProcessedWorkbook = await processor.processWorkbook(
+        functionsArray,
         (progress) => {
           ll.debug("Got processing progress", progress);
           setStatus((p) => {
@@ -86,6 +105,7 @@ const ETT = () => {
   }
   return (
     <div className="ETT">
+      <Box sx={{ marginTop: "15px" }}></Box>
       <div
         style={{
           display: "flex",
@@ -113,16 +133,47 @@ const ETT = () => {
           />
         </Button>
       </div>
+      <Box sx={{ marginTop: "15px" }}></Box>
+      <div>
+        <Box sx={{ minWidth: 280 }}>
+          <FormControl sx={{ minWidth: 280 }}>
+            <InputLabel id="demo-simple-select-label">Function Name</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              value={selectedFunction}
+              label="Function Name"
+              onChange={(e) => {
+                const newFunction = e.target.value;
+                setSelectedFunction(newFunction);
+              }}
+            >
+              {(functions || []).map((f) => {
+                return (
+                  <MenuItem key={f.name} value={f.name}>
+                    {f.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+        </Box>
+      </div>
+      <Box sx={{ marginTop: "15px" }}></Box>
       {(() => {
         if (status.isProcessing === false) {
           return (
             <div>
+              <Box sx={{ marginTop: "15px" }}></Box>
               {(() => {
                 if (workbook) {
                   return (
                     <Button
                       onClick={async () => {
-                        const processedWorkbook = await process(workbook);
+                        const processedWorkbook = await process(workbook, [
+                          functions.filter(
+                            (f) => f.name === selectedFunction
+                          )[0],
+                        ]);
                         ll.debug(
                           "setting processed workbook",
                           processedWorkbook
@@ -139,6 +190,7 @@ const ETT = () => {
           );
         }
       })()}
+      <Box sx={{ marginTop: "15px" }}></Box>
       {(() => {
         if (status.isProcessing) {
           return (
@@ -149,6 +201,7 @@ const ETT = () => {
           );
         }
       })()}
+      <Box sx={{ marginTop: "15px" }}></Box>
       {(() => {
         if (status.value === 100 && processedWorkbook) {
           return (
@@ -164,6 +217,35 @@ const ETT = () => {
           );
         }
       })()}
+
+      <Button
+        onClick={async () => {
+          chrome.runtime.sendMessage({ greeting: "hello" }, (response) => {
+            ll.debug("got message back", response);
+          });
+        }}
+      >
+        SEND TASK TO BG
+      </Button>
+      <Button
+        onClick={() => {
+          (async () => {
+            const [tab] = await chrome.tabs.query({
+              active: true,
+              lastFocusedWindow: true,
+            });
+            if (tab?.id !== undefined) {
+              const response = await chrome.tabs.sendMessage(tab.id, {
+                greeting: "hello",
+              });
+              // do something with response here, not outside the function
+              ll.debug("got back response from content script: ", response);
+            }
+          })();
+        }}
+      >
+        SEND TASK TO CONTENT SCRIPT
+      </Button>
     </div>
   );
 };
