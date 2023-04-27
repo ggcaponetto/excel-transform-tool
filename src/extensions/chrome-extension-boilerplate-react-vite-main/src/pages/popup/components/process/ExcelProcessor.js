@@ -51,61 +51,71 @@ export default function ExcelProcessor(context, workbook) {
       workbook: this.workbook,
     });
   };
-  const processWorkbook = async (onProgress) => {
-    ll.debug("processing workbook...", {
-      workbook: this.workbook,
-    });
+  const processWorkbook = (onProgress) => {
+    return new Promise((resolveProcessing) => {
+      ll.debug("processing workbook...", {
+        workbook: this.workbook,
+      });
 
-    let workPromises = [];
-    let totalCellCount = getTotalCellCount();
-    ll.debug("total cells: " + totalCellCount);
-    let tempCellCounter = 0;
-    for (const sheetName of Object.keys(this.workbook.Sheets)) {
-      let sheet = this.workbook.Sheets[sheetName];
-      for (const cellName of Object.keys(sheet).filter(
-        (cellName) => !cellName.startsWith("!")
-      )) {
-        tempCellCounter++;
-        let percentage = (tempCellCounter / totalCellCount) * 100;
-        /*ll.debug(
-          `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
-        );*/
-        workPromises.push(
-          (ms) =>
-            new Promise((res) => {
-              setTimeout(() => {
-                res(cellName);
-              }, ms);
-            })
-        );
+      let workPromises = [];
+      let totalCellCount = getTotalCellCount();
+      ll.debug("total cells: " + totalCellCount);
+      let tempCellCounter = 0;
+      for (const sheetName of Object.keys(this.workbook.Sheets)) {
+        for (const cellName of Object.keys(
+          this.workbook.Sheets[sheetName]
+        ).filter((cellName) => !cellName.startsWith("!"))) {
+          tempCellCounter++;
+          /*let percentage = (tempCellCounter / totalCellCount) * 100;
+          ll.debug(
+            `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
+          );*/
+          workPromises.push(
+            (ms) =>
+              new Promise((res) => {
+                setTimeout(() => {
+                  // https://docs.sheetjs.com/docs/solutions/processing
+                  XLSX.utils.sheet_add_aoa(
+                    this.workbook.Sheets[sheetName],
+                    [
+                      [
+                        this.workbook.Sheets[sheetName][cellName].w +
+                          " (something else)",
+                      ],
+                    ],
+                    { origin: cellName }
+                  );
+                  res(cellName);
+                }, ms);
+              })
+          );
+        }
       }
-    }
-    let allResults = [];
-    const forEachSeries = async (iterable) => {
-      let counter = 0;
-      for (const x of iterable) {
-        counter++;
-        let res = await x(10);
-        let percentage = (counter / totalCellCount) * 100;
-        /*ll.debug(
-          `processed cell ${counter}/${totalCellCount} (${percentage.toFixed(
-            2
-          )})`,
-          res
-        );*/
-        allResults.push(res);
-        onProgress({
-          percentage,
-          data: allResults,
-        });
-      }
-    };
+      let allResults = [];
+      const forEachSeries = async (iterable) => {
+        let counter = 0;
+        for (const x of iterable) {
+          counter++;
+          let res = await x(2);
+          let percentage = (counter / totalCellCount) * 100;
+          /*ll.debug(
+            `processed cell ${counter}/${totalCellCount} (${percentage.toFixed(
+              2
+            )})`,
+            res
+          );*/
+          allResults.push(res);
+          onProgress({
+            percentage,
+            data: allResults,
+            workbook: this.workbook,
+          });
+        }
+      };
 
-    forEachSeries(workPromises).then(() => {
-      console.log("all done!");
-      onProgress({
-        percentage: 100,
-        data: allResults,
+      return forEachSeries(workPromises).then(() => {
+        console.log("all done!");
+        resolveProcessing(this.workbook);
       });
     });
   };

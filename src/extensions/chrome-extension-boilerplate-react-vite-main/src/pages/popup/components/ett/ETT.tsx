@@ -48,7 +48,8 @@ const ETT = () => {
   }, [uploadEvent]);
 
   async function process(workbook) {
-    return new Promise((res) => {
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async (resolve) => {
       /* Create a new workbook */
       setStatus((p) => {
         return {
@@ -67,16 +68,20 @@ const ETT = () => {
       });
       ll.debug("New workbook is", newWorkbook);
       const processor = new ExcelProcessor({}, newWorkbook);
-      processor.processWorkbook((progress) => {
-        ll.debug("Got processing progress", progress);
-        setStatus((p) => {
-          return {
-            ...p,
-            isProcessing: progress.percentage < 100,
-            value: progress.percentage,
-          };
-        });
-      });
+      const newProcessedWorkbook = await processor.processWorkbook(
+        (progress) => {
+          ll.debug("Got processing progress", progress);
+          setStatus((p) => {
+            return {
+              ...p,
+              isProcessing: progress.percentage < 100,
+              value: progress.percentage,
+            };
+          });
+        }
+      );
+      ll.debug("Got processed workbook", newProcessedWorkbook);
+      resolve(newProcessedWorkbook);
     });
   }
   return (
@@ -118,6 +123,10 @@ const ETT = () => {
                     <Button
                       onClick={async () => {
                         const processedWorkbook = await process(workbook);
+                        ll.debug(
+                          "setting processed workbook",
+                          processedWorkbook
+                        );
                         setProcessedWorkbook(processedWorkbook);
                       }}
                     >
@@ -141,7 +150,7 @@ const ETT = () => {
         }
       })()}
       {(() => {
-        if (status.isReadyToDownload && processedWorkbook) {
+        if (status.value === 100 && processedWorkbook) {
           return (
             <div>
               <Button
