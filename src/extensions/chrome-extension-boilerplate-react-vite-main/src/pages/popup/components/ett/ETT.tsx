@@ -48,7 +48,7 @@ const ETT = () => {
   }, [uploadEvent]);
 
   async function process(workbook) {
-    return new Promise(async (res, rej) => {
+    return new Promise((res) => {
       /* Create a new workbook */
       setStatus((p) => {
         return {
@@ -67,22 +67,16 @@ const ETT = () => {
       });
       ll.debug("New workbook is", newWorkbook);
       const processor = new ExcelProcessor({}, newWorkbook);
-      const processedWorkbook = await processor.processWorkbook((update) => {
+      processor.processWorkbook((update) => {
         ll.debug("Got processing update", update);
         setStatus((p) => {
           return {
             ...p,
+            isProcessing: update.progress < 100,
             value: update.progress,
           };
         });
       });
-      setStatus((p) => {
-        return {
-          ...p,
-          isProcessing: false,
-        };
-      });
-      res(processedWorkbook);
     });
   }
   return (

@@ -42,23 +42,25 @@ export default function ExcelProcessor(context, workbook) {
     ll.debug("processing workbook...", {
       workbook: this.workbook,
     });
-    return new Promise((res, rej) => {
-      Object.keys(this.workbook.Sheets).forEach((sheetName) => {
+    let workPromises = [];
+    return new Promise((allResolve) => {
+      for (const sheetName of Object.keys(this.workbook.Sheets)) {
         let sheet = this.workbook.Sheets[sheetName];
-        let cellCounter = 0;
-        Object.keys(sheet)
-          .filter((cellName) => !cellName.startsWith("!"))
-          .forEach((cellName) => {
-            (async () => {
-              cellCounter++;
+        let sheetCellCounter = 0;
+        for (const cellName of Object.keys(sheet).filter(
+          (cellName) => !cellName.startsWith("!")
+        )) {
+          workPromises.push(
+            new Promise((resWorkPromise) => {
+              sheetCellCounter++;
               let cell = splitCell(cellName);
               let totalRows = getRange(sheet).e.r + 1;
               let totalColumns = getRange(sheet).e.c + 1;
               let totalCells = totalRows * totalColumns;
               let currentRow = cell.row;
-              let progress = (cellCounter / totalCells) * 100;
+              let progress = (sheetCellCounter / totalCells) * 100;
               ll.debug(
-                `processing cell ${cellName} rows: ${currentRow}/${totalRows}, cell: ${cellCounter}/${totalCells}`,
+                `processing cell ${cellName} rows: ${currentRow}/${totalRows}, cell: ${sheetCellCounter}/${totalCells}`,
                 {
                   totalRows,
                   currentRow,
@@ -67,18 +69,34 @@ export default function ExcelProcessor(context, workbook) {
                   cell,
                 }
               );
-              await new Promise((res) => setTimeout(res, 100));
-              onProgress({
-                progress,
-                cellName,
-              });
-            })();
-          });
+              setTimeout(() => {
+                let result = {
+                  progress,
+                  cellName,
+                };
+                onProgress(result);
+                resWorkPromise(result);
+              }, 500);
+            })
+          );
+        }
+      }
+
+      let promiseExecution = async () => {
+        for (let promise of workPromises) {
+          try {
+            const res = await promise;
+          } catch (error) {
+            console.error(error.message);
+          }
+        }
+      };
+      return promiseExecution().then(() => {
+        ll.debug("finished processing workbook.", {
+          workbook: this.workbook,
+        });
+        allResolve(this.workbook);
       });
-      ll.debug("finished processing workbook.", {
-        workbook: this.workbook,
-      });
-      res(this.workbook);
     }, []);
   };
   return {
