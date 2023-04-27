@@ -1,7 +1,7 @@
 import process from "process";
 
 import * as log from "loglevel";
-const ll = log.getLogger("store.js");
+const ll = log.getLogger("store");
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -143,6 +143,22 @@ function Store(dbName, storeName, options) {
       };
     });
   };
+  const deleteEntry = (query) => {
+    return new Promise((res, rej) => {
+      const transaction = this.db.transaction([this.storeName], "readwrite");
+      const objectStore = transaction.objectStore(this.storeName);
+      let request = objectStore.delete(query);
+      // report that the data item has been deleted
+      transaction.oncomplete = () => {
+        ll.debug("delete data with query", query);
+        res("deleted");
+      };
+      transaction.onerror = () => {
+        ll.error("could not delete data with query", query);
+        rej("could not delete");
+      };
+    });
+  };
   return {
     open,
     write,
@@ -150,6 +166,7 @@ function Store(dbName, storeName, options) {
     prune,
     destroy,
     get,
+    deleteEntry,
   };
 }
 

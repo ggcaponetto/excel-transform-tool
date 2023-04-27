@@ -5,9 +5,9 @@ import API from "../api/API";
 import axios from "axios";
 import Input from "@mui/material/Input";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
-import FunctionStore from "@pages/popup/components/store/FunctionStore";
+import FunctionStore from "@pages/popup/components/test/FunctionStore";
 import * as log from "loglevel";
-const ll = log.getLogger("ETT.tsx");
+const ll = log.getLogger("ETT");
 import process from "process";
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {

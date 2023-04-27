@@ -9,7 +9,7 @@ import ETT from "../ett/ETT";
 import Settings from "../settings/Settings";
 import BasicTabs from "@pages/popup/components/tabs/Tabs";
 import * as log from "loglevel";
-const ll = log.getLogger("Home.tsx");
+const ll = log.getLogger("Home");
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
 const isLogsEnabled = false;

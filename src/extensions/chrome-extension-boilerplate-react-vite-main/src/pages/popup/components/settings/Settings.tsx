@@ -8,7 +8,7 @@ import PopupContext from "@pages/popup/components/context/popup-context";
 import * as log from "loglevel";
 import "./Settins.css";
 import Divider from "@mui/material/Divider";
-const ll = log.getLogger("Settings.tsx");
+const ll = log.getLogger("Settings");
 
 import process from "process";
 import FnStore from "@pages/popup/components/fn-store/FnStore";

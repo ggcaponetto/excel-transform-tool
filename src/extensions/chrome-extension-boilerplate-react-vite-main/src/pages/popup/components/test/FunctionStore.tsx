@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@mui/material";
-import Store from "./store";
+import Store from "./../store/store";
 import TextField from "@mui/material/TextField";
 import * as log from "loglevel";
-const ll = log.getLogger("FunctionStore.tsx");
+const ll = log.getLogger("FunctionStore");
 import process from "process";
 
 const isLogsEnabled = false;

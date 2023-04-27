@@ -18,11 +18,10 @@ import "./FnStore.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 
-const ll = log.getLogger("FnStore.tsx");
-
+const ll = log.getLogger("FnStore");
 import process from "process";
 
-const isLogsEnabled = false;
+const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
 } else {
@@ -31,7 +30,7 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 
 function createData(
   name: string,
-  comment: number,
+  comment: string,
   status: number,
   order: number
 ) {
@@ -43,7 +42,10 @@ function createData(
   };
 }
 
-function Row(props: { row: ReturnType<typeof createData> }) {
+function Row(props: {
+  row: ReturnType<typeof createData>;
+  onDelete: ReturnType<typeof Function>;
+}) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
 
@@ -66,7 +68,11 @@ function Row(props: { row: ReturnType<typeof createData> }) {
         <TableCell align="right">{row.status}</TableCell>
         <TableCell align="right">{row.order}</TableCell>
         <TableCell align="right">
-          <IconButton>
+          <IconButton
+            onClick={() => {
+              props.onDelete(row);
+            }}
+          >
             <DeleteIcon></DeleteIcon>
           </IconButton>
         </TableCell>
@@ -98,7 +104,7 @@ export function CollapsibleTable(props) {
         </TableHead>
         <TableBody>
           {props.excelFunctions.map((row) => (
-            <Row key={row.name} row={row} />
+            <Row key={row.name} row={row} onDelete={props.onDelete} />
           ))}
         </TableBody>
       </Table>
@@ -107,28 +113,67 @@ export function CollapsibleTable(props) {
 }
 
 const store = new Store("ett-functions", "functions", {
-  keyPath: "type",
+  keyPath: "name",
 });
+const storeIndices = [
+  {
+    name: "name",
+    unique: false,
+  },
+  {
+    name: "comment",
+    unique: false,
+  },
+  {
+    name: "status",
+    unique: false,
+  },
+  {
+    name: "order",
+    unique: false,
+  },
+];
 const FnStore = () => {
   const [excelFunctions, setExcelFunctions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const update = async () => {
+    ll.debug("functions are loading from the db...");
+    const dbInstance = await store.open((objectStore) => {
+      ll.debug("creating store indices for the functions component");
+      storeIndices.forEach((index) => {
+        objectStore.createIndex(index.name, index.name, {
+          unique: index.unique,
+        });
+      });
+    });
+    ll.debug("functions have been loaded");
+    /* get the stored theme setting */
+    const functions = await store.getAll();
+    setExcelFunctions(functions);
+  };
   useEffect(() => {
-    (async () => {
-      const newExcelFunctions = [
-        createData("Frozen yoghurt", 159, 6.0, 24),
-        createData("Frozen yoghurt", 159, 6.0, 24),
-        createData("Frozen yoghurt", 159, 6.0, 24),
-        createData("Frozen yoghurt", 159, 6.0, 24),
-        createData("Frozen yoghurt", 159, 6.0, 24),
-        createData("Frozen yoghurt", 159, 6.0, 24),
-        createData("Frozen yoghurt", 159, 6.0, 24),
-      ];
-      setExcelFunctions(newExcelFunctions);
-    })();
+    update();
   }, []);
+  const onCreateNew = async () => {
+    const newFunction = createData(
+      "Frozen yoghurt " + new Date().toLocaleString(),
+      new Date().toLocaleString(),
+      6.0,
+      24
+    );
+    await store.write([newFunction]);
+    ll.debug("stored new function", newFunction);
+    await update();
+  };
+  const onDelete = async (fnToDelete) => {
+    ll.debug("deleting function", fnToDelete);
+    await store.deleteEntry(fnToDelete.name);
+    await update();
+  };
   return (
     <div className="FnStore">
-      <CollapsibleTable excelFunctions={excelFunctions} />
+      <CollapsibleTable excelFunctions={excelFunctions} onDelete={onDelete} />
       <div
         className={"add-function"}
         style={{
@@ -142,6 +187,7 @@ const FnStore = () => {
           style={{
             display: "flex",
           }}
+          onClick={onCreateNew}
         >
           <AddCircleIcon />
         </IconButton>
