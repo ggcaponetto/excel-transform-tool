@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import ExtPay from "extpay";
-import { Typography, Button, Box } from "@mui/material";
+import { Typography, Button, Box, LinearProgress } from "@mui/material";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
 import * as log from "loglevel";
+import ExcelProcessor from "./../process/ExcelProcessor";
 const ll = log.getLogger("ETT");
 import process from "process";
-const isLogsEnabled = false;
+const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
 } else {
@@ -13,7 +14,11 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 }
 
 const ETT = () => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState({
+    isProcessing: false,
+    isReadyToDownload: false,
+    value: 0,
+  });
   const [uploadEvent, setUploadEvent] = useState(null);
   const [workbook, setWorkbook] = useState(null);
   const [processedWorkbook, setProcessedWorkbook] = useState(null);
@@ -42,24 +47,43 @@ const ETT = () => {
     }
   }, [uploadEvent]);
 
-  /* set up drag-and-drop event */
-  async function process(workbook, callback) {
-    /* Create a new workbook */
-    const newWorkbook = XLSX.utils.book_new();
-    /* Iterate all sheets */
-    Object.keys(workbook.Sheets).forEach((sheetName) => {
-      const sheet = workbook.Sheets[sheetName];
-      ll.debug(`processing sheet ${sheetName}`, sheet);
-      const range = XLSX.utils.decode_range(sheet["!ref"]);
-      ll.debug("row count is", range.e.r);
-      ll.debug("column count is", range.e.c);
-
-      /* Clone this worksheet with the transformations */
-      const clonedWorksheet = JSON.parse(JSON.stringify(sheet)); // make a copy of the object
-      XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
+  async function process(workbook) {
+    return new Promise(async (res, rej) => {
+      /* Create a new workbook */
+      setStatus((p) => {
+        return {
+          ...p,
+          isProcessing: true,
+        };
+      });
+      const newWorkbook = XLSX.utils.book_new();
+      /* Iterate all sheets */
+      Object.keys(workbook.Sheets).forEach((sheetName) => {
+        const sheet = workbook.Sheets[sheetName];
+        ll.debug(`processing sheet ${sheetName}`, sheet);
+        /* Clone this worksheet with the transformations */
+        const clonedWorksheet = JSON.parse(JSON.stringify(sheet)); // make a copy of the object
+        XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
+      });
+      ll.debug("New workbook is", newWorkbook);
+      const processor = new ExcelProcessor({}, newWorkbook);
+      const processedWorkbook = await processor.processWorkbook((update) => {
+        const progress = update;
+        setStatus((p) => {
+          return {
+            ...p,
+            value: progress,
+          };
+        });
+      });
+      setStatus((p) => {
+        return {
+          ...p,
+          isProcessing: false,
+        };
+      });
+      res(processedWorkbook);
     });
-    ll.debug("New workbook is", newWorkbook);
-    callback(newWorkbook);
   }
   return (
     <div className="ETT">
@@ -90,27 +114,42 @@ const ETT = () => {
           />
         </Button>
       </div>
-      <div>
-        {(() => {
-          if (workbook) {
-            return (
-              <Button
-                onClick={() => {
-                  process(workbook, (newWorkbook) => {
-                    setProcessedWorkbook(newWorkbook);
-                  });
-                }}
-              >
-                Process
-              </Button>
-            );
-          }
-        })()}
-      </div>
-      <div>
-        {(() => {
-          if (processedWorkbook) {
-            return (
+      {(() => {
+        if (status.isProcessing === false) {
+          return (
+            <div>
+              {(() => {
+                if (workbook) {
+                  return (
+                    <Button
+                      onClick={async () => {
+                        const processedWorkbook = await process(workbook);
+                        setProcessedWorkbook(processedWorkbook);
+                      }}
+                    >
+                      Process
+                    </Button>
+                  );
+                }
+              })()}
+            </div>
+          );
+        }
+      })()}
+      {(() => {
+        if (status.isProcessing) {
+          return (
+            <LinearProgress
+              variant="determinate"
+              value={Math.round(status.value)}
+            />
+          );
+        }
+      })()}
+      {(() => {
+        if (status.isReadyToDownload && processedWorkbook) {
+          return (
+            <div>
               <Button
                 onClick={() => {
                   XLSX.writeFile(processedWorkbook, "processed.xlsx", {});
@@ -118,10 +157,10 @@ const ETT = () => {
               >
                 Download
               </Button>
-            );
-          }
-        })()}
-      </div>
+            </div>
+          );
+        }
+      })()}
     </div>
   );
 };
