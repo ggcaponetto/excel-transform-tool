@@ -34,20 +34,16 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 const defaultFunction = createData(
   "New Function",
   "My new function",
-  "",
-  "",
   `
   function processRow(){
     alert("hello world")
   }
   `
 );
-function createData(name, comment, status, order, data) {
+function createData(name, comment, data) {
   return {
     name,
     comment,
-    status,
-    order,
     data,
   };
 }
@@ -121,8 +117,6 @@ function Row(props: {
             }}
           />
         </TableCell>
-        <TableCell align="left">{currentRow.status}</TableCell>
-        <TableCell align="left">{currentRow.order}</TableCell>
         <TableCell align="left">
           <IconButton
             onClick={() => {
@@ -167,8 +161,6 @@ export function CollapsibleTable(props) {
             <TableCell />
             <TableCell>Name</TableCell>
             <TableCell align="left">Comment</TableCell>
-            <TableCell align="left">Status</TableCell>
-            <TableCell align="left">Order</TableCell>
             <TableCell align="left">Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -199,14 +191,6 @@ const storeIndices = [
   },
   {
     name: "comment",
-    unique: false,
-  },
-  {
-    name: "status",
-    unique: false,
-  },
-  {
-    name: "order",
     unique: false,
   },
 ];
