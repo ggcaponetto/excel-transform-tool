@@ -56,7 +56,7 @@ export default function ExcelProcessor(context, workbook) {
               let totalColumns = getRange(sheet).e.c + 1;
               let totalCells = totalRows * totalColumns;
               let currentRow = cell.row;
-              let progress = cellCounter / totalCells;
+              let progress = (cellCounter / totalCells) * 100;
               ll.debug(
                 `processing cell ${cellName} rows: ${currentRow}/${totalRows}, cell: ${cellCounter}/${totalCells}`,
                 {
@@ -75,12 +75,10 @@ export default function ExcelProcessor(context, workbook) {
             })();
           });
       });
-      setTimeout(() => {
-        ll.debug("finished processing workbook.", {
-          workbook: this.workbook,
-        });
-        res(this.workbook);
-      }, 3000);
+      ll.debug("finished processing workbook.", {
+        workbook: this.workbook,
+      });
+      res(this.workbook);
     }, []);
   };
   return {
