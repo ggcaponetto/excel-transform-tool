@@ -17,10 +17,12 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import "./FnStore.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import SaveIcon from "@mui/icons-material/Save";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
 import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
+import TextField from "@mui/material/TextField";
 
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -54,10 +56,33 @@ function Row(props: {
   row: ReturnType<typeof createData>;
   onDelete: ReturnType<typeof Function>;
   onEdit: ReturnType<typeof Function>;
+  onSave: ReturnType<typeof Function>;
+  tempExcelFunctions: ReturnType<any>;
 }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-
+  const currentRow = props.tempExcelFunctions[props.row.name] || props.row;
+  const isEdited = (() => {
+    const hasTempFn = props.tempExcelFunctions[props.row.name] !== undefined;
+    return (
+      hasTempFn &&
+      JSON.stringify(props.tempExcelFunctions[props.row.name]) !==
+        JSON.stringify(props.row)
+    );
+  })();
+  const onChange = (newRow) => {
+    const oldRow = props.row;
+    props.onEdit(oldRow, newRow);
+  };
+  const onSave = (oldRow, newRow) => {
+    props.onSave(oldRow, newRow);
+  };
+  useEffect(() => {
+    console.log("tempExcelFunctions changed", {
+      tempFunctions: props.tempExcelFunctions,
+      row: props.row,
+    });
+  }, [props.tempExcelFunctions, props.row]);
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -71,12 +96,34 @@ function Row(props: {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {row.name}
+          <TextField
+            id="standard-basic"
+            variant="standard"
+            value={currentRow.name}
+            onChange={(e) => {
+              onChange({
+                ...row,
+                name: e.target.value,
+              });
+            }}
+          />
         </TableCell>
-        <TableCell align="right">{row.comment}</TableCell>
-        <TableCell align="right">{row.status}</TableCell>
-        <TableCell align="right">{row.order}</TableCell>
-        <TableCell align="right">
+        <TableCell align="left">
+          <TextField
+            id="standard-basic"
+            variant="standard"
+            value={currentRow.comment}
+            onChange={(e) => {
+              onChange({
+                ...row,
+                comment: e.target.value,
+              });
+            }}
+          />
+        </TableCell>
+        <TableCell align="left">{currentRow.status}</TableCell>
+        <TableCell align="left">{currentRow.order}</TableCell>
+        <TableCell align="left">
           <IconButton
             onClick={() => {
               props.onDelete(row);
@@ -84,6 +131,20 @@ function Row(props: {
           >
             <DeleteIcon></DeleteIcon>
           </IconButton>
+          {(() => {
+            if (isEdited) {
+              return (
+                <IconButton
+                  onClick={() => {
+                    ll.debug("onSave");
+                    onSave(props.row, currentRow);
+                  }}
+                >
+                  <SaveIcon></SaveIcon>
+                </IconButton>
+              );
+            }
+          })()}
         </TableCell>
       </TableRow>
       <TableRow>
@@ -105,10 +166,10 @@ export function CollapsibleTable(props) {
           <TableRow>
             <TableCell />
             <TableCell>Name</TableCell>
-            <TableCell align="right">Comment</TableCell>
-            <TableCell align="right">Status</TableCell>
-            <TableCell align="right">Order</TableCell>
-            <TableCell align="right">Actions</TableCell>
+            <TableCell align="left">Comment</TableCell>
+            <TableCell align="left">Status</TableCell>
+            <TableCell align="left">Order</TableCell>
+            <TableCell align="left">Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -118,6 +179,8 @@ export function CollapsibleTable(props) {
               row={row}
               onDelete={props.onDelete}
               onEdit={props.onEdit}
+              onSave={props.onSave}
+              tempExcelFunctions={props.tempExcelFunctions}
             />
           ))}
         </TableBody>
@@ -150,6 +213,7 @@ const storeIndices = [
 const FnStore = () => {
   const [excelFunctions, setExcelFunctions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [tempExcelFunctions, setTempExcelFunctions] = useState({});
 
   const update = async () => {
     ll.debug("functions are loading from the db...");
@@ -179,25 +243,41 @@ const FnStore = () => {
     await store.deleteEntry(fnToDelete.name);
     await update();
   };
-  const onEdit = async ({ row, editedContent }) => {
-    ll.debug("editing function", {
-      row,
-      editedContent,
+  const onEdit = async (oldRow, newRow) => {
+    ll.debug("editing function", newRow);
+    setTempExcelFunctions((p) => {
+      const newTempExcelFunctions = {
+        ...p,
+      };
+      newTempExcelFunctions[oldRow.name] = newRow;
+      return newTempExcelFunctions;
     });
-    await store.write([
-      {
-        ...row,
-        data: editedContent,
-      },
-    ]);
+  };
+  const onSave = async (oldRow, newRow) => {
+    ll.debug("about to save a function", {
+      oldRow,
+      newRow,
+    });
+    await store.deleteEntry(oldRow.name);
+    await store.deleteEntry(newRow.name);
+    await store.write([newRow]);
+    /* After saving an element, we need to update the temp functions store and remove the edits */
+    const newTempFunctions = {
+      ...tempExcelFunctions,
+    };
+    delete newTempFunctions[oldRow.name];
+    delete newTempFunctions[newRow.name];
+    setTempExcelFunctions(newTempFunctions);
     await update();
   };
   return (
     <div className="FnStore">
       <CollapsibleTable
         excelFunctions={excelFunctions}
+        tempExcelFunctions={tempExcelFunctions}
         onDelete={onDelete}
         onEdit={onEdit}
+        onSave={onSave}
       />
       <div
         className={"add-function"}

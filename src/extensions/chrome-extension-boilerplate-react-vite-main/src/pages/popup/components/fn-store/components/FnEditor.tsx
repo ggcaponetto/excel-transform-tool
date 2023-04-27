@@ -45,9 +45,10 @@ const FnEditor = (props) => {
                 editedContent,
                 update,
               });
-              props.onEdit({
-                row: props.row,
-                editedContent,
+              const oldRow = props.row;
+              props.onEdit(oldRow, {
+                ...props.row,
+                data: editedContent,
               });
             }
           }),
