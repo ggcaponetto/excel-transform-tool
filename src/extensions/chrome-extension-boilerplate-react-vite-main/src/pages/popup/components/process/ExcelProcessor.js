@@ -1,4 +1,5 @@
 import * as log from "loglevel";
+
 const ll = log.getLogger("FnStore");
 import process from "process";
 import XLSX from "xlsx";
@@ -32,6 +33,18 @@ export default function ExcelProcessor(context, workbook) {
       throw new Error("String does not match expected format");
     }
   };
+  const getTotalCellCount = () => {
+    let totalCellCount = 0;
+    for (const sheetName of Object.keys(this.workbook.Sheets)) {
+      let sheet = this.workbook.Sheets[sheetName];
+      for (const cellName of Object.keys(sheet).filter(
+        (cellName) => !cellName.startsWith("!")
+      )) {
+        totalCellCount++;
+      }
+    }
+    return totalCellCount;
+  };
   const evalCode = (code) => {
     ll.debug("evaluating code", {
       code,
@@ -42,62 +55,59 @@ export default function ExcelProcessor(context, workbook) {
     ll.debug("processing workbook...", {
       workbook: this.workbook,
     });
-    let workPromises = [];
-    return new Promise((allResolve) => {
-      for (const sheetName of Object.keys(this.workbook.Sheets)) {
-        let sheet = this.workbook.Sheets[sheetName];
-        let sheetCellCounter = 0;
-        for (const cellName of Object.keys(sheet).filter(
-          (cellName) => !cellName.startsWith("!")
-        )) {
-          workPromises.push(
-            new Promise((resWorkPromise) => {
-              sheetCellCounter++;
-              let cell = splitCell(cellName);
-              let totalRows = getRange(sheet).e.r + 1;
-              let totalColumns = getRange(sheet).e.c + 1;
-              let totalCells = totalRows * totalColumns;
-              let currentRow = cell.row;
-              let progress = (sheetCellCounter / totalCells) * 100;
-              ll.debug(
-                `processing cell ${cellName} rows: ${currentRow}/${totalRows}, cell: ${sheetCellCounter}/${totalCells}`,
-                {
-                  totalRows,
-                  currentRow,
-                  workbook: this.workbook,
-                  cellName,
-                  cell,
-                }
-              );
-              setTimeout(() => {
-                let result = {
-                  progress,
-                  cellName,
-                };
-                onProgress(result);
-                resWorkPromise(result);
-              }, 500);
-            })
-          );
-        }
-      }
 
-      let promiseExecution = async () => {
-        for (let promise of workPromises) {
-          try {
-            const res = await promise;
-          } catch (error) {
-            console.error(error.message);
-          }
-        }
-      };
-      return promiseExecution().then(() => {
-        ll.debug("finished processing workbook.", {
-          workbook: this.workbook,
+    let workPromises = [];
+    let totalCellCount = getTotalCellCount();
+    ll.debug("total cells: " + totalCellCount);
+    let tempCellCounter = 0;
+    for (const sheetName of Object.keys(this.workbook.Sheets)) {
+      let sheet = this.workbook.Sheets[sheetName];
+      for (const cellName of Object.keys(sheet).filter(
+        (cellName) => !cellName.startsWith("!")
+      )) {
+        tempCellCounter++;
+        let percentage = (tempCellCounter / totalCellCount) * 100;
+        /*ll.debug(
+          `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
+        );*/
+        workPromises.push(
+          (ms) =>
+            new Promise((res) => {
+              setTimeout(() => {
+                res(cellName);
+              }, ms);
+            })
+        );
+      }
+    }
+    let allResults = [];
+    const forEachSeries = async (iterable) => {
+      let counter = 0;
+      for (const x of iterable) {
+        counter++;
+        let res = await x(10);
+        let percentage = (counter / totalCellCount) * 100;
+        /*ll.debug(
+          `processed cell ${counter}/${totalCellCount} (${percentage.toFixed(
+            2
+          )})`,
+          res
+        );*/
+        allResults.push(res);
+        onProgress({
+          percentage,
+          data: allResults,
         });
-        allResolve(this.workbook);
+      }
+    };
+
+    forEachSeries(workPromises).then(() => {
+      console.log("all done!");
+      onProgress({
+        percentage: 100,
+        data: allResults,
       });
-    }, []);
+    });
   };
   return {
     evalCode,

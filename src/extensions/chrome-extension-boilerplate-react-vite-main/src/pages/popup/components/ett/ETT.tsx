@@ -67,13 +67,13 @@ const ETT = () => {
       });
       ll.debug("New workbook is", newWorkbook);
       const processor = new ExcelProcessor({}, newWorkbook);
-      processor.processWorkbook((update) => {
-        ll.debug("Got processing update", update);
+      processor.processWorkbook((progress) => {
+        ll.debug("Got processing progress", progress);
         setStatus((p) => {
           return {
             ...p,
-            isProcessing: update.progress < 100,
-            value: update.progress,
+            isProcessing: progress.percentage < 100,
+            value: progress.percentage,
           };
         });
       });
