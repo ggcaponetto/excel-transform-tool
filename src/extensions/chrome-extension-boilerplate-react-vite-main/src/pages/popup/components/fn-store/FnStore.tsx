@@ -179,9 +179,18 @@ const FnStore = () => {
     await store.deleteEntry(fnToDelete.name);
     await update();
   };
-  const onEdit = async (fnToEdit) => {
-    ll.debug("editing function", fnToEdit);
-    // await update();
+  const onEdit = async ({ row, editedContent }) => {
+    ll.debug("editing function", {
+      row,
+      editedContent,
+    });
+    await store.write([
+      {
+        ...row,
+        data: editedContent,
+      },
+    ]);
+    await update();
   };
   return (
     <div className="FnStore">

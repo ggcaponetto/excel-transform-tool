@@ -40,10 +40,14 @@ const FnEditor = (props) => {
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               // Handle the event here
-              const newContent = ediorView.state.doc.toString();
+              const editedContent = ediorView.state.doc.toString();
               ll.debug("document changed", {
-                newContent,
+                editedContent,
                 update,
+              });
+              props.onEdit({
+                row: props.row,
+                editedContent,
               });
             }
           }),
