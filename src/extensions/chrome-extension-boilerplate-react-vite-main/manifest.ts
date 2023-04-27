@@ -14,6 +14,13 @@ const manifest: chrome.runtime.ManifestV3 = {
     service_worker: "src/pages/background/index.js",
     type: "module",
   },
+  content_security_policy: {
+    sandbox:
+      "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';",
+  },
+  sandbox: {
+    pages: ["src/pages/sandbox/index.html"],
+  },
   action: {
     default_popup: "src/pages/popup/index.html",
     default_icon: "icon-34.png",

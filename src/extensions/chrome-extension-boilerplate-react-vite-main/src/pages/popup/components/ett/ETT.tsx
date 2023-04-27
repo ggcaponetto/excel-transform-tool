@@ -35,6 +35,10 @@ const ETT = () => {
 
   useEffect(() => {
     ll.debug("ETT initialized.", workbook);
+
+    window.addEventListener("message", function (event) {
+      console.log("got message from the sandbox", event);
+    });
   }, []);
 
   useEffect(() => {
@@ -245,6 +249,22 @@ const ETT = () => {
         }}
       >
         SEND TASK TO CONTENT SCRIPT
+      </Button>
+      <Button
+        onClick={() => {
+          (async () => {
+            const iframe = document.getElementById("sanbdox-bridge");
+            const message = {
+              command: "eval",
+              code: "function run(){return 99}; run()",
+            };
+            // eslint-disable-next-line
+              // @ts-ignore
+            iframe.contentWindow.postMessage(message, "*");
+          })();
+        }}
+      >
+        SEND TASK TO SANDBOX
       </Button>
     </div>
   );

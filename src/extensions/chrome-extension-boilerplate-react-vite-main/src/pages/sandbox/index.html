@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sandbox</title>
+    <script>
+        window.onload = () => {
+            console.log("loaded sandbox...")
+        }
+        window.addEventListener('message', function(event) {
+            console.log("got message inside the sandbox", event)
+            if(event.data.command === "eval"){
+                console.log("evaluating code...", event.data.code);
+                let res = eval(event.data.code);
+                console.log("sending back eval result", res);
+                event.source.postMessage({
+                    result: res
+                }, event.origin);
+            }
+        });
+        console.log("the sandbox is listening to events ")
+    </script>
+</head>
+
+<body>
+My sandbox
+<!--<script type="module" src="./index.tsx"></script>-->
+</body>
+</html>
