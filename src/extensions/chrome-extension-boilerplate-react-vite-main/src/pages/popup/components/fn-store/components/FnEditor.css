@@ -1,5 +1,5 @@
-.FnEditor {
-
+.FnEditor *{
+    caret-color: #868686;
 }
 
 .cm-gutter {

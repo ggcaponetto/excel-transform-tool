@@ -8,6 +8,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle,
 } from "@codemirror/language";
+import { HighlightStyle } from "@codemirror/language";
 import { javascript } from "@codemirror/lang-javascript";
 
 const ll = log.getLogger("FnEditor");
@@ -27,7 +28,7 @@ const FnEditor = (props) => {
   const editorRef = useRef(null);
   useEffect(() => {
     if (isLoading === false) {
-      const view = new EditorView({
+      const ediorView = new EditorView({
         doc: props.row.data,
         extensions: [
           history(),
@@ -36,10 +37,20 @@ const FnEditor = (props) => {
           keymap.of([...defaultKeymap, ...historyKeymap]),
           lineNumbers(),
           gutter({ class: "cm-mygutter" }),
+          EditorView.updateListener.of((update) => {
+            if (update.docChanged) {
+              // Handle the event here
+              const newContent = ediorView.state.doc.toString();
+              ll.debug("document changed", {
+                newContent,
+                update,
+              });
+            }
+          }),
         ],
         parent: editorRef.current,
       });
-      ll.debug("initialized codemirror view", view);
+      ll.debug("initialized codemirror ediorView", ediorView);
     }
   }, [isLoading]);
   return (
