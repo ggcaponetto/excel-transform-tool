@@ -1,11 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ExtPay from "extpay";
 import { Typography, Button, Box } from "@mui/material";
-import API from "../api/API";
-import axios from "axios";
-import Input from "@mui/material/Input";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
-import FunctionStore from "@pages/popup/components/test/FunctionStore";
 import * as log from "loglevel";
 const ll = log.getLogger("ETT");
 import process from "process";
@@ -126,7 +122,6 @@ const ETT = () => {
           }
         })()}
       </div>
-      <FunctionStore />
     </div>
   );
 };

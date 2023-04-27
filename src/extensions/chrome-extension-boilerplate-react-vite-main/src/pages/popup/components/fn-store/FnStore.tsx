@@ -20,6 +20,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
+import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
 
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -28,23 +29,31 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.WARN);
 }
 
-function createData(
-  name: string,
-  comment: string,
-  status: number,
-  order: number
-) {
+const defaultFunction = createData(
+  "New Function",
+  "My new function",
+  "",
+  "",
+  `
+  function processRow(){
+    alert("hello world")
+  }
+  `
+);
+function createData(name, comment, status, order, data) {
   return {
     name,
     comment,
     status,
     order,
+    data,
   };
 }
 
 function Row(props: {
   row: ReturnType<typeof createData>;
   onDelete: ReturnType<typeof Function>;
+  onEdit: ReturnType<typeof Function>;
 }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
@@ -80,7 +89,7 @@ function Row(props: {
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            Some collapsable content
+            <FnEditor row={props.row} onEdit={props.onEdit}></FnEditor>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -104,7 +113,12 @@ export function CollapsibleTable(props) {
         </TableHead>
         <TableBody>
           {props.excelFunctions.map((row) => (
-            <Row key={row.name} row={row} onDelete={props.onDelete} />
+            <Row
+              key={row.name}
+              row={row}
+              onDelete={props.onDelete}
+              onEdit={props.onEdit}
+            />
           ))}
         </TableBody>
       </Table>
@@ -156,14 +170,8 @@ const FnStore = () => {
     update();
   }, []);
   const onCreateNew = async () => {
-    const newFunction = createData(
-      "Frozen yoghurt " + new Date().toLocaleString(),
-      new Date().toLocaleString(),
-      6.0,
-      24
-    );
-    await store.write([newFunction]);
-    ll.debug("stored new function", newFunction);
+    await store.write([defaultFunction]);
+    ll.debug("stored new function", defaultFunction);
     await update();
   };
   const onDelete = async (fnToDelete) => {
@@ -171,9 +179,17 @@ const FnStore = () => {
     await store.deleteEntry(fnToDelete.name);
     await update();
   };
+  const onEdit = async (fnToEdit) => {
+    ll.debug("editing function", fnToEdit);
+    // await update();
+  };
   return (
     <div className="FnStore">
-      <CollapsibleTable excelFunctions={excelFunctions} onDelete={onDelete} />
+      <CollapsibleTable
+        excelFunctions={excelFunctions}
+        onDelete={onDelete}
+        onEdit={onEdit}
+      />
       <div
         className={"add-function"}
         style={{
