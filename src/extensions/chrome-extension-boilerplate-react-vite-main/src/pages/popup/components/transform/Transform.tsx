@@ -291,7 +291,11 @@ const Transform = () => {
               className={"custom-button"}
               variant={"contained"}
               onClick={() => {
-                XLSX.writeFile(processedWorkbook, "processed.xlsx", {});
+                XLSX.writeFile(
+                  processedWorkbook,
+                  `processed_${uploadEvent.target.files[0].name}`,
+                  {}
+                );
               }}
             >
               Download
