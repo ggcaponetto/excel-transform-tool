@@ -35,10 +35,14 @@ const defaultFunction = createData(
   "New Function",
   "My new function",
   `
-  function processCell(){
-    return "hello world!";
+async function run() {
+    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+    const data = await response.json();
+    return data;
   }
-  `
+run()
+  .then(data => { console.log(data); return data; })
+`
 );
 function createData(name, comment, data) {
   return {

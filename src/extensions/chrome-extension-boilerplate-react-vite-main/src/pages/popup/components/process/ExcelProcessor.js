@@ -106,15 +106,7 @@ export default function ExcelProcessor(context, workbook) {
               const iframe = document.getElementById("sanbdox-bridge");
               const message = {
                 command: "eval",
-                code: `
-                async function run() {
-                    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
-                    const data = await response.json();
-                    return data;
-                  }
-                run()
-                  .then(data => { console.log(data); return data; })
-                `,
+                code: functions[0].data,
               };
               const evalResponse = await runInSandbox(iframe, message);
               ll.debug("processor got message from sandbox", evalResponse);

@@ -222,58 +222,6 @@ const ETT = () => {
           );
         }
       })()}
-
-      <Button
-        onClick={async () => {
-          chrome.runtime.sendMessage({ greeting: "hello" }, (response) => {
-            ll.debug("got message back", response);
-          });
-        }}
-      >
-        SEND TASK TO BG
-      </Button>
-      <Button
-        onClick={() => {
-          (async () => {
-            const [tab] = await chrome.tabs.query({
-              active: true,
-              lastFocusedWindow: true,
-            });
-            if (tab?.id !== undefined) {
-              const response = await chrome.tabs.sendMessage(tab.id, {
-                greeting: "hello",
-              });
-              // do something with response here, not outside the function
-              ll.debug("got back response from content script: ", response);
-            }
-          })();
-        }}
-      >
-        SEND TASK TO CONTENT SCRIPT
-      </Button>
-      <Button
-        onClick={() => {
-          (async () => {
-            const iframe = document.getElementById("sanbdox-bridge");
-            const message = {
-              command: "eval",
-              code: `
-                async function run() {
-                    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
-                    const data = await response.json();
-                    return data;
-                  }
-                run()
-                  .then(data => { console.log(data); return data; })
-                `,
-            };
-            const res = await processor.runInSandbox(iframe, message);
-            ll.debug("got message from sandbox", res);
-          })();
-        }}
-      >
-        SEND TASK TO SANDBOX
-      </Button>
     </div>
   );
 };
