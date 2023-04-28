@@ -112,6 +112,7 @@ export default function ExcelProcessor(context, workbook) {
                   cell: splitCell(cellName),
                   cellName,
                   sheetName,
+                  cellValue: this.workbook.Sheets[sheetName][cellName].w,
                   range: getRange(this.workbook.Sheets[sheetName]),
                 },
               };

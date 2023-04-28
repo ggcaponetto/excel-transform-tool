@@ -41,12 +41,17 @@ ll.debug("jshint import", JSHINT);
 
 const defaultFunction = createData(
   "New Function",
-  "My new function",
-  `async function run() {
-    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
-    const data = await response.json();
-    return data;
-  }
+  "A simple function that makes an API call for the column B.",
+  `const run = async () => {
+    const cellName = this.cellName;
+    const column = this.cell.column;
+    if(column === "B"){
+        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+        const data = await response.json();
+        return this.cellValue + " " + data.title;
+    }
+    return this.cellValue;
+  };
 run().then(data => { console.log(data); return data; });`
 );
 function createData(name, comment, data) {
@@ -67,15 +72,14 @@ function Row(props: {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   const [jshintData, setJsHintData] = useState(null);
-  const currentRow = props.tempExcelFunctions[props.row.name] || props.row;
-  const isEdited = (() => {
-    const hasTempFn = props.tempExcelFunctions[props.row.name] !== undefined;
-    return (
-      hasTempFn &&
-      JSON.stringify(props.tempExcelFunctions[props.row.name]) !==
-        JSON.stringify(props.row)
-    );
+  const currentRow = (() => {
+    try {
+      return props.tempExcelFunctions[props.row.name].pop() || props.row;
+    } catch (e) {
+      return props.row;
+    }
   })();
+  const isEdited = JSON.stringify(currentRow) !== JSON.stringify(props.row);
   const hasJsHintErrors = (jshintData?.errors || []).length > 0;
   const onChange = (newRow) => {
     const oldRow = props.row;
@@ -84,12 +88,6 @@ function Row(props: {
   const onSave = (oldRow, newRow) => {
     props.onSave(oldRow, newRow);
   };
-  useEffect(() => {
-    console.log("tempExcelFunctions changed", {
-      tempFunctions: props.tempExcelFunctions,
-      row: props.row,
-    });
-  }, [props.tempExcelFunctions, props.row]);
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -109,7 +107,7 @@ function Row(props: {
             value={currentRow.name}
             onChange={(e) => {
               onChange({
-                ...row,
+                ...currentRow,
                 name: e.target.value,
               });
             }}
@@ -122,7 +120,7 @@ function Row(props: {
             value={currentRow.comment}
             onChange={(e) => {
               onChange({
-                ...row,
+                ...currentRow,
                 comment: e.target.value,
               });
             }}
@@ -161,6 +159,7 @@ function Row(props: {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <FnEditor
               row={props.row}
+              currentRow={currentRow}
               onEdit={props.onEdit}
               onJsHint={(jshintData) => {
                 setJsHintData(jshintData);
@@ -229,14 +228,7 @@ const FnStore = () => {
         `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/basic.json`
       );
       ll.debug("got template functions", templateFunctionsResponse);
-      setTemplateFunctions(
-        templateFunctionsResponse.data.map((d) => {
-          return {
-            ...d,
-            isTemplate: true,
-          };
-        })
-      );
+      setTemplateFunctions(templateFunctionsResponse.data);
     })();
   }, []);
   const update = async () => {
@@ -283,17 +275,15 @@ const FnStore = () => {
           setLibraryDownload(null);
         }}
         onLoad={async () => {
-          ll.debug(
-            "loading the community library",
-            templateFunctions.map((f) => {
-              return {
-                ...f,
-                name: `lib ${f.name}`,
-              };
-            })
-          );
+          ll.debug("loading the community library", templateFunctions);
+          const newTemplateFunctions = templateFunctions.map((f) => {
+            return {
+              ...f,
+              name: `From library: ${f.name}`,
+            };
+          });
           const mergedFunctions = [
-            ...(templateFunctions || []),
+            ...(newTemplateFunctions || []),
             ...(excelFunctions || []),
           ];
           await store.write(mergedFunctions);
@@ -313,13 +303,18 @@ const FnStore = () => {
     await update();
   };
   const onEdit = async (oldRow, newRow) => {
-    ll.debug("editing function", newRow);
+    ll.debug("editing function", {
+      oldRow,
+      newRow,
+    });
     setTempExcelFunctions((p) => {
       const newTempExcelFunctions = {
         ...p,
       };
-      newTempExcelFunctions[oldRow.name] = undefined;
-      newTempExcelFunctions[newRow.name] = newRow;
+      newTempExcelFunctions[oldRow.name] = [
+        ...(newTempExcelFunctions[oldRow.name] || []),
+        newRow,
+      ];
       return newTempExcelFunctions;
     });
   };
@@ -329,15 +324,9 @@ const FnStore = () => {
       newRow,
     });
     await store.deleteEntry(oldRow.name);
-    await store.deleteEntry(newRow.name);
     await store.write([newRow]);
     /* After saving an element, we need to update the temp functions store and remove the edits */
-    const newTempFunctions = {
-      ...tempExcelFunctions,
-    };
-    delete newTempFunctions[oldRow.name];
-    delete newTempFunctions[newRow.name];
-    setTempExcelFunctions(newTempFunctions);
+    setTempExcelFunctions({});
     await update();
   };
   return (

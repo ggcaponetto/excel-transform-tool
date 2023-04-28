@@ -1,4 +1,10 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import * as log from "loglevel";
 import "./FnEditor.css";
 
@@ -29,47 +35,64 @@ const FnEditor = (props) => {
   const [editorView, setEditorView] = useState(null);
   const [jshintData, setJshintData] = useState(null);
   const editorRef = useRef(null);
+  const [editedContent, setEditedContent] = useState(props.currentRow);
 
+  useEffect(() => {
+    ll.debug("currentRow changes in editor", {
+      row: props.row,
+      currentRow: props.currentRow,
+    });
+  }, [props.currentRow]);
   const getJsHintData = (code) => {
     const jshintData = getJshintData(code);
     return jshintData;
   };
-  useEffect(() => {
-    if (isLoading === false) {
-      const newEditorView = new EditorView({
-        doc: props.row.data,
-        extensions: [
-          history(),
-          javascript(),
-          syntaxHighlighting(defaultHighlightStyle),
-          keymap.of([...defaultKeymap, ...historyKeymap]),
-          lineNumbers(),
-          gutter({ class: "cm-mygutter" }),
-          EditorView.updateListener.of((update) => {
-            if (update.docChanged) {
-              // Handle the event here
-              const editedContent = newEditorView.state.doc.toString();
-              ll.debug("document changed", {
-                editedContent,
-                update,
-              });
-              const oldRow = props.row;
-              const newJshintData = getJsHintData(editedContent);
-              props.onJsHint(newJshintData);
-              setJshintData(newJshintData);
-              props.onEdit(oldRow, {
-                ...props.row,
+  const initEditor = () => {
+    const newEditorView = new EditorView({
+      doc: props.row.data,
+      extensions: [
+        history(),
+        javascript(),
+        syntaxHighlighting(defaultHighlightStyle),
+        keymap.of([...defaultKeymap, ...historyKeymap]),
+        lineNumbers(),
+        EditorView.lineWrapping,
+        gutter({ class: "cm-mygutter" }),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            // Handle the event here
+            const editedContent = newEditorView.state.doc.toString();
+            const newJshintData = getJsHintData(editedContent);
+            props.onJsHint(newJshintData);
+            setJshintData(newJshintData);
+            ll.debug("document changed", {
+              editedContent,
+              update,
+              currentRow: props.currentRow,
+              newRow: {
+                ...props.currentRow,
                 data: editedContent,
-              });
-            }
-          }),
-        ],
-        parent: editorRef.current,
-      });
-      ll.debug("initialized codemirror editor view", newEditorView);
-      setEditorView(newEditorView);
+              },
+            });
+            const oldRow = props.row;
+            props.onEdit(oldRow, {
+              ...props.currentRow,
+              data: editedContent,
+            });
+            setEditedContent(editedContent);
+          }
+        }),
+      ],
+      parent: editorRef.current,
+    });
+    ll.debug("initialized codemirror editor view", newEditorView);
+    setEditorView(newEditorView);
+  };
+  useEffect(() => {
+    if (isLoading === false && editorView === null) {
+      initEditor();
     }
-  }, [isLoading]);
+  }, [isLoading, editorView]);
   const getJshintData = (code) => {
     const source = [code];
     const options = {

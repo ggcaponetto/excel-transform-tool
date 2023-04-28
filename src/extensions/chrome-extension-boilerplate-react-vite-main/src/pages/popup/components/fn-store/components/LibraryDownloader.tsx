@@ -41,6 +41,7 @@ function SimpleDialog(props) {
             justifyContent: "center",
           }}
         >
+          <Box style={{ marginTop: "30px" }} />
           <Button
             onClick={async () => {
               ll.debug("onLoad clicked");
