@@ -20,6 +20,8 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SaveIcon from "@mui/icons-material/Save";
 import { JSHINT } from "jshint";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
+import axios from "axios";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
@@ -27,6 +29,7 @@ import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
 import TextField from "@mui/material/TextField";
 import messaging from "./../messaging/messaging";
 import { bool } from "prop-types";
+import LibraryDownloader from "@pages/popup/components/fn-store/components/LibraryDownloader";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -214,10 +217,28 @@ export const storeIndices = [
   },
 ];
 const FnStore = () => {
+  const [templateFunctions, setTemplateFunctions] = useState(null);
   const [excelFunctions, setExcelFunctions] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [libraryDownload, setLibraryDownload] = useState(null);
   const [tempExcelFunctions, setTempExcelFunctions] = useState({});
 
+  useEffect(() => {
+    /* fetch the template functions from the public github repo */
+    (async () => {
+      const templateFunctionsResponse = await axios.get(
+        `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/basic.json`
+      );
+      ll.debug("got template functions", templateFunctionsResponse);
+      setTemplateFunctions(
+        templateFunctionsResponse.data.map((d) => {
+          return {
+            ...d,
+            isTemplate: true,
+          };
+        })
+      );
+    })();
+  }, []);
   const update = async () => {
     ll.debug("functions are loading from the db...");
     const dbInstance = await store.open((objectStore) => {
@@ -255,6 +276,37 @@ const FnStore = () => {
     ll.debug("stored new function", defaultFunction);
     await update();
   };
+  const onDownloadFromLibrary = async () => {
+    setLibraryDownload(
+      <LibraryDownloader
+        onClose={() => {
+          setLibraryDownload(null);
+        }}
+        onLoad={async () => {
+          ll.debug(
+            "loading the community library",
+            templateFunctions.map((f) => {
+              return {
+                ...f,
+                name: `lib ${f.name}`,
+              };
+            })
+          );
+          const mergedFunctions = [
+            ...(templateFunctions || []),
+            ...(excelFunctions || []),
+          ];
+          await store.write(mergedFunctions);
+          ll.debug("stored new function", {
+            defaultFunction,
+            mergedFunctions,
+          });
+          await update();
+          setLibraryDownload(null);
+        }}
+      />
+    );
+  };
   const onDelete = async (fnToDelete) => {
     ll.debug("deleting function", fnToDelete);
     await store.deleteEntry(fnToDelete.name);
@@ -290,6 +342,7 @@ const FnStore = () => {
   };
   return (
     <div className="FnStore">
+      {libraryDownload}
       <CollapsibleTable
         excelFunctions={excelFunctions}
         tempExcelFunctions={tempExcelFunctions}
@@ -313,6 +366,14 @@ const FnStore = () => {
           onClick={onCreateNew}
         >
           <AddCircleIcon />
+        </IconButton>
+        <IconButton
+          style={{
+            display: "flex",
+          }}
+          onClick={onDownloadFromLibrary}
+        >
+          <CloudDownloadIcon />
         </IconButton>
       </div>
     </div>
