@@ -13,7 +13,7 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.WARN);
 }
 
-const store = new Store("ett-functions", "functions", {
+const store = new Store("transform-functions", "functions", {
   keyPath: "name",
 });
 export default function ExcelProcessor(context, workbook) {

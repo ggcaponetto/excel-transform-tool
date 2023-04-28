@@ -23,7 +23,7 @@ const ll = log.getLogger("FnStore");
 import process from "process";
 import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
 import TextField from "@mui/material/TextField";
-
+import messaging from "./../messaging/messaging";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -185,7 +185,7 @@ export function CollapsibleTable(props) {
   );
 }
 
-export const store = new Store("ett-functions", "functions", {
+export const store = new Store("transform-functions", "functions", {
   keyPath: "name",
 });
 export const storeIndices = [
@@ -220,8 +220,23 @@ const FnStore = () => {
   useEffect(() => {
     update();
   }, []);
+  useEffect(() => {
+    /* dispatch an event every time the functions change so that other tabs can react to it */
+    window.dispatchEvent(
+      new CustomEvent(`${messaging.prefix}-tabs-message`, {
+        detail: {
+          type: "function-update",
+        },
+      })
+    );
+  }, [excelFunctions]);
   const onCreateNew = async () => {
-    await store.write([defaultFunction]);
+    await store.write([
+      {
+        ...defaultFunction,
+        name: `New Function (${new Date().toLocaleString()})`,
+      },
+    ]);
     ll.debug("stored new function", defaultFunction);
     await update();
   };

@@ -13,7 +13,7 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.WARN);
 }
 
-const store = new Store("ett-sample", "ett-sample", {
+const store = new Store("transform-sample", "transform-sample", {
   keyPath: "id",
 });
 const FunctionStore = () => {

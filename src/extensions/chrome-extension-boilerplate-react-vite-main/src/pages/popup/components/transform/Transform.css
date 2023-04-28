@@ -1,0 +1,21 @@
+.Transform {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    align-items: center;
+}
+.Transform > div {
+    display: flex;
+    flex-direction: column;
+}
+.Transform .custom-row{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.Transform .custom-button {
+    max-width: 300px;
+    width: 100%;
+}

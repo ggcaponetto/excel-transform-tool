@@ -5,10 +5,11 @@ import API from "../api/API";
 import axios from "axios";
 import "./Home.css";
 import * as process from "process";
-import ETT from "../ett/ETT";
+import Transform from "../transform/Transform";
 import Settings from "../settings/Settings";
 import BasicTabs from "@pages/popup/components/tabs/Tabs";
 import * as log from "loglevel";
+import Functions from "@pages/popup/components/functions/Functions";
 const ll = log.getLogger("Home");
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
@@ -67,10 +68,16 @@ const Home = () => {
     } else if (user && user.paid) {
       return (
         <BasicTabs
+          titles={[
+            // eslint-disable-next-line react/jsx-key
+            <div>tranform</div>,
+            // eslint-disable-next-line react/jsx-key
+            <div>functions</div>,
+            // eslint-disable-next-line react/jsx-key
+            <div>settings</div>,
+          ]}
           // eslint-disable-next-line react/jsx-key
-          titles={[<div>tranform</div>, <div>settings</div>]}
-          // eslint-disable-next-line react/jsx-key
-          components={[<ETT />, <Settings />]}
+          components={[<Transform />, <Functions />, <Settings />]}
         />
       );
       /*return (

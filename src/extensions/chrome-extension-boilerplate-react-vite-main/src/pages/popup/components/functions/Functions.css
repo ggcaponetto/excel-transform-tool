@@ -1,12 +1,9 @@
-.Settings {
+.Functions {
     display: flex;
     flex-direction: column;
     flex: 1;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
 }
-.Settings > div {
+.Functions > div {
     display: flex;
     flex-direction: column;
 }
