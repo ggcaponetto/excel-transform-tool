@@ -30,19 +30,18 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 }
 
 const FnEditor = (props) => {
-  const [excelFunctions, setExcelFunctions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editorView, setEditorView] = useState(null);
   const [jshintData, setJshintData] = useState(null);
   const editorRef = useRef(null);
-  const [editedContent, setEditedContent] = useState(props.currentRow);
+  const [editedContent, setEditedContent] = useState(null);
 
   useEffect(() => {
-    ll.debug("currentRow changes in editor", {
-      row: props.row,
-      currentRow: props.currentRow,
-    });
-  }, [props.currentRow]);
+    if (editedContent !== null) {
+      ll.debug("new editor content", editedContent);
+      props.onEdit(editedContent);
+    }
+  }, [editedContent]);
   const getJsHintData = (code) => {
     const jshintData = getJshintData(code);
     return jshintData;
@@ -65,20 +64,6 @@ const FnEditor = (props) => {
             const newJshintData = getJsHintData(editedContent);
             props.onJsHint(newJshintData);
             setJshintData(newJshintData);
-            ll.debug("document changed", {
-              editedContent,
-              update,
-              currentRow: props.currentRow,
-              newRow: {
-                ...props.currentRow,
-                data: editedContent,
-              },
-            });
-            const oldRow = props.row;
-            props.onEdit(oldRow, {
-              ...props.currentRow,
-              data: editedContent,
-            });
             setEditedContent(editedContent);
           }
         }),

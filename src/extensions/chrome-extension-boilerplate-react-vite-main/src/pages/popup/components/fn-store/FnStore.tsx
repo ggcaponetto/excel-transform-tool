@@ -72,17 +72,10 @@ function Row(props: {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   const [jshintData, setJsHintData] = useState(null);
-  const currentRow = (() => {
-    try {
-      return props.tempExcelFunctions[props.row.name].pop() || props.row;
-    } catch (e) {
-      return props.row;
-    }
-  })();
-  const isEdited = JSON.stringify(currentRow) !== JSON.stringify(props.row);
+  const [isEdited, setIsEdited] = useState(false);
+
   const hasJsHintErrors = (jshintData?.errors || []).length > 0;
-  const onChange = (newRow) => {
-    const oldRow = props.row;
+  const onChange = (oldRow, newRow) => {
     props.onEdit(oldRow, newRow);
   };
   const onSave = (oldRow, newRow) => {
@@ -104,10 +97,10 @@ function Row(props: {
           <TextField
             id="standard-basic"
             variant="standard"
-            value={currentRow.name}
+            value={props.row.name}
             onChange={(e) => {
-              onChange({
-                ...currentRow,
+              onChange(props.row, {
+                ...props.row,
                 name: e.target.value,
               });
             }}
@@ -117,10 +110,10 @@ function Row(props: {
           <TextField
             id="standard-basic"
             variant="standard"
-            value={currentRow.comment}
+            value={props.row.comment}
             onChange={(e) => {
-              onChange({
-                ...currentRow,
+              onChange(props.row, {
+                ...props.row,
                 comment: e.target.value,
               });
             }}
@@ -141,7 +134,7 @@ function Row(props: {
                   disabled={hasJsHintErrors}
                   onClick={() => {
                     ll.debug("onSave");
-                    onSave(props.row, currentRow);
+                    onSave(props.row, props.row);
                   }}
                 >
                   <SaveIcon></SaveIcon>
@@ -156,11 +149,15 @@ function Row(props: {
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
+          <Collapse in={open} timeout="auto" unmountOnExit={false}>
             <FnEditor
               row={props.row}
-              currentRow={currentRow}
-              onEdit={props.onEdit}
+              onEdit={(editedContent) => {
+                props.onEdit(props.row, {
+                  ...props.row,
+                  data: editedContent,
+                });
+              }}
               onJsHint={(jshintData) => {
                 setJsHintData(jshintData);
               }}
@@ -189,7 +186,7 @@ export function CollapsibleTable(props) {
           {props.excelFunctions.map((row) => (
             <Row
               key={row.name}
-              row={row}
+              row={props.tempExcelFunctions[row.name] || row}
               onDelete={props.onDelete}
               onEdit={props.onEdit}
               onSave={props.onSave}
@@ -220,6 +217,10 @@ const FnStore = () => {
   const [excelFunctions, setExcelFunctions] = useState([]);
   const [libraryDownload, setLibraryDownload] = useState(null);
   const [tempExcelFunctions, setTempExcelFunctions] = useState({});
+
+  useEffect(() => {
+    ll.debug("tempExcelFunctions changes", tempExcelFunctions);
+  }, [tempExcelFunctions]);
 
   useEffect(() => {
     /* fetch the template functions from the public github repo */
@@ -308,13 +309,11 @@ const FnStore = () => {
       newRow,
     });
     setTempExcelFunctions((p) => {
+      const clone = JSON.parse(JSON.stringify(p));
       const newTempExcelFunctions = {
-        ...p,
+        ...clone,
+        [oldRow.name]: newRow,
       };
-      newTempExcelFunctions[oldRow.name] = [
-        ...(newTempExcelFunctions[oldRow.name] || []),
-        newRow,
-      ];
       return newTempExcelFunctions;
     });
   };
