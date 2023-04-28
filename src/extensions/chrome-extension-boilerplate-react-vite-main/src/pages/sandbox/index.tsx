@@ -30,7 +30,12 @@ window.addEventListener("message", async function (event) {
       code: event.data.code,
       context: event.data.context,
     });
-    const result = await evalInContext(event.data.code, event.data.context);
+    const result = await evalInContext(
+      event.data.code,
+      event.data.context
+    ).catch((e) => {
+      return e.message;
+    });
     console.log("the sandbox is sending back the evaluated result: ", result);
     event.source.postMessage(
       {

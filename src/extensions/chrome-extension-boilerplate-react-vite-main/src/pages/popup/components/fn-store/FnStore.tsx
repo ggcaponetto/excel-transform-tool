@@ -18,6 +18,7 @@ import "./FnStore.css";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SaveIcon from "@mui/icons-material/Save";
+import { JSHINT } from "jshint";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
@@ -31,18 +32,17 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.WARN);
 }
 
+ll.debug("jshint import", JSHINT);
+
 const defaultFunction = createData(
   "New Function",
   "My new function",
-  `
-async function run() {
+  `async function run() {
     const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
     const data = await response.json();
     return data;
   }
-run()
-  .then(data => { console.log(data); return data; })
-`
+run().then(data => { console.log(data); return data; });`
 );
 function createData(name, comment, data) {
   return {
@@ -76,6 +76,17 @@ function Row(props: {
   };
   const onSave = (oldRow, newRow) => {
     props.onSave(oldRow, newRow);
+  };
+  const getJsHintData = (code) => {
+    const source = [code];
+    const options = {
+      esversion: 11,
+    };
+    const predef = {};
+    JSHINT(source, options, predef);
+    const data = JSHINT.data();
+    ll.debug("jshint data", JSHINT);
+    return data;
   };
   useEffect(() => {
     console.log("tempExcelFunctions changed", {
@@ -144,6 +155,13 @@ function Row(props: {
             }
           })()}
         </TableCell>
+        <TableCell align="left">
+          <ul>
+            {(getJsHintData(currentRow.data).errors || []).map((e, i) => {
+              return <li key={JSON.stringify(i)}>{e.raw}</li>;
+            })}
+          </ul>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -166,6 +184,7 @@ export function CollapsibleTable(props) {
             <TableCell>Name</TableCell>
             <TableCell align="left">Comment</TableCell>
             <TableCell align="left">Actions</TableCell>
+            <TableCell align="left">Errors</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
