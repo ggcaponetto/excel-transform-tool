@@ -36,6 +36,7 @@ const ETT = () => {
 
   useEffect(() => {
     ll.debug("ETT initialized.", workbook);
+    /* listen to update requests */
   }, []);
 
   useEffect(() => {
