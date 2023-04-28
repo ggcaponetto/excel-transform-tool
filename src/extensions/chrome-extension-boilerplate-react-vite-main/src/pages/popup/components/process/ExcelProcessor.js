@@ -100,27 +100,32 @@ export default function ExcelProcessor(context, workbook) {
           ll.debug(
             `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
           );*/
-          workPromises.push(
-            (ms) =>
-              new Promise((res) => {
-                setTimeout(() => {
-                  // https://docs.sheetjs.com/docs/solutions/processing
-                  const evalContext = {
-                    cell: this.workbook.Sheets[sheetName][cellName].w,
-                  };
-                  functions.forEach((func) => {
-                    let evalResult = evalInContext(evalContext, func.data);
-                    ll.debug("eval result: ", evalResult);
-                    XLSX.utils.sheet_add_aoa(
-                      this.workbook.Sheets[sheetName],
-                      [[evalResult]],
-                      { origin: cellName }
-                    );
-                  });
-                  res(cellName);
-                }, ms);
-              })
-          );
+          workPromises.push(() => {
+            // eslint-disable-next-line no-async-promise-executor
+            return new Promise(async (resolve) => {
+              const iframe = document.getElementById("sanbdox-bridge");
+              const message = {
+                command: "eval",
+                code: `
+                async function run() {
+                    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+                    const data = await response.json();
+                    return data;
+                  }
+                run()
+                  .then(data => { console.log(data); return data; })
+                `,
+              };
+              const evalResponse = await runInSandbox(iframe, message);
+              ll.debug("processor got message from sandbox", evalResponse);
+              XLSX.utils.sheet_add_aoa(
+                this.workbook.Sheets[sheetName],
+                [[JSON.stringify(evalResponse.data.result)]],
+                { origin: cellName }
+              );
+              resolve();
+            });
+          });
         }
       }
       let allResults = [];
