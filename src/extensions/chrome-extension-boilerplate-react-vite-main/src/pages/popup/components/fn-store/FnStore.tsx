@@ -19,12 +19,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import SaveIcon from "@mui/icons-material/Save";
 import { JSHINT } from "jshint";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
 import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
 import TextField from "@mui/material/TextField";
 import messaging from "./../messaging/messaging";
+import { bool } from "prop-types";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -61,6 +63,7 @@ function Row(props: {
 }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  const [jshintData, setJsHintData] = useState(null);
   const currentRow = props.tempExcelFunctions[props.row.name] || props.row;
   const isEdited = (() => {
     const hasTempFn = props.tempExcelFunctions[props.row.name] !== undefined;
@@ -70,23 +73,13 @@ function Row(props: {
         JSON.stringify(props.row)
     );
   })();
+  const hasJsHintErrors = (jshintData?.errors || []).length > 0;
   const onChange = (newRow) => {
     const oldRow = props.row;
     props.onEdit(oldRow, newRow);
   };
   const onSave = (oldRow, newRow) => {
     props.onSave(oldRow, newRow);
-  };
-  const getJsHintData = (code) => {
-    const source = [code];
-    const options = {
-      esversion: 11,
-    };
-    const predef = {};
-    JSHINT(source, options, predef);
-    const data = JSHINT.data();
-    ll.debug("jshint data", JSHINT);
-    return data;
   };
   useEffect(() => {
     console.log("tempExcelFunctions changed", {
@@ -144,6 +137,7 @@ function Row(props: {
             if (isEdited) {
               return (
                 <IconButton
+                  disabled={hasJsHintErrors}
                   onClick={() => {
                     ll.debug("onSave");
                     onSave(props.row, currentRow);
@@ -156,17 +150,19 @@ function Row(props: {
           })()}
         </TableCell>
         <TableCell align="left">
-          <ul>
-            {(getJsHintData(currentRow.data).errors || []).map((e, i) => {
-              return <li key={JSON.stringify(i)}>{e.raw}</li>;
-            })}
-          </ul>
+          {hasJsHintErrors ? <ErrorOutlineIcon /> : null}
         </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <FnEditor row={props.row} onEdit={props.onEdit}></FnEditor>
+            <FnEditor
+              row={props.row}
+              onEdit={props.onEdit}
+              onJsHint={(jshintData) => {
+                setJsHintData(jshintData);
+              }}
+            ></FnEditor>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -270,7 +266,8 @@ const FnStore = () => {
       const newTempExcelFunctions = {
         ...p,
       };
-      newTempExcelFunctions[oldRow.name] = newRow;
+      newTempExcelFunctions[oldRow.name] = undefined;
+      newTempExcelFunctions[newRow.name] = newRow;
       return newTempExcelFunctions;
     });
   };
