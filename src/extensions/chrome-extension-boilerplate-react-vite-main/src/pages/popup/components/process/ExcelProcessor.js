@@ -107,12 +107,19 @@ export default function ExcelProcessor(context, workbook) {
               const message = {
                 command: "eval",
                 code: functions[0].data,
+                context: {
+                  wb: this.workbook,
+                  cell: splitCell(cellName),
+                  cellName,
+                  sheetName,
+                  range: getRange(this.workbook.Sheets[sheetName]),
+                },
               };
               const evalResponse = await runInSandbox(iframe, message);
               ll.debug("processor got message from sandbox", evalResponse);
               XLSX.utils.sheet_add_aoa(
                 this.workbook.Sheets[sheetName],
-                [[JSON.stringify(evalResponse.data.result)]],
+                [[evalResponse.data.result]],
                 { origin: cellName }
               );
               resolve();
