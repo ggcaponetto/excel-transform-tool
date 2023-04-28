@@ -4,6 +4,7 @@ import { Typography, Button, Box, LinearProgress } from "@mui/material";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
 import * as log from "loglevel";
 import ExcelProcessor from "./../process/ExcelProcessor";
+
 const ll = log.getLogger("ETT");
 import process from "process";
 import InputLabel from "@mui/material/InputLabel";
@@ -35,10 +36,6 @@ const ETT = () => {
 
   useEffect(() => {
     ll.debug("ETT initialized.", workbook);
-
-    window.addEventListener("message", function (event) {
-      console.log("got message from the sandbox", event);
-    });
   }, []);
 
   useEffect(() => {
@@ -70,7 +67,7 @@ const ETT = () => {
     }
   }, [uploadEvent]);
 
-  async function process(workbook, functionsArray) {
+  async function processWorkbook(workbook, functionsArray) {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve) => {
       /* Create a new workbook */
@@ -107,6 +104,7 @@ const ETT = () => {
       resolve(newProcessedWorkbook);
     });
   }
+
   return (
     <div className="ETT">
       <Box sx={{ marginTop: "15px" }}></Box>
@@ -173,11 +171,14 @@ const ETT = () => {
                   return (
                     <Button
                       onClick={async () => {
-                        const processedWorkbook = await process(workbook, [
-                          functions.filter(
-                            (f) => f.name === selectedFunction
-                          )[0],
-                        ]);
+                        const processedWorkbook = await processWorkbook(
+                          workbook,
+                          [
+                            functions.filter(
+                              (f) => f.name === selectedFunction
+                            )[0],
+                          ]
+                        );
                         ll.debug(
                           "setting processed workbook",
                           processedWorkbook
@@ -256,11 +257,18 @@ const ETT = () => {
             const iframe = document.getElementById("sanbdox-bridge");
             const message = {
               command: "eval",
-              code: "function run(){return 99}; run()",
+              code: `
+                async function run() {
+                    const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+                    const data = await response.json();
+                    return data;
+                  }
+                run()
+                  .then(data => { console.log(data); return data; })
+                `,
             };
-            // eslint-disable-next-line
-              // @ts-ignore
-            iframe.contentWindow.postMessage(message, "*");
+            const res = await processor.runInSandbox(iframe, message);
+            ll.debug("got message from sandbox", res);
           })();
         }}
       >

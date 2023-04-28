@@ -14,17 +14,18 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 refreshOnUpdate("pages/sandbox");
 
 window.onload = () => {
-  console.log("loaded sandbox...");
+  console.log("the sandbox has been loaded.");
 };
-window.addEventListener("message", function (event) {
-  console.log("got message inside the sandbox", event);
+window.addEventListener("message", async function (event) {
+  console.log("the sandbox got a message", event);
   if (event.data.command === "eval") {
-    console.log("evaluating code...", event.data.code);
-    const res = eval(event.data.code);
-    console.log("sending back eval result", res);
+    console.log("the sandbox is evaluating code...", event.data.code);
+    const result = await eval(event.data.code);
+    console.log("the sandbox is sending back the evaluated result", result);
     event.source.postMessage(
       {
-        result: res,
+        result: result,
+        originalData: event.data,
       },
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -32,4 +33,4 @@ window.addEventListener("message", function (event) {
     );
   }
 });
-console.log("the sandbox is listening to events ");
+console.log("the sandbox is now listening to events");

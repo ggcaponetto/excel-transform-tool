@@ -151,10 +151,23 @@ export default function ExcelProcessor(context, workbook) {
       });
     });
   };
+  const runInSandbox = async (iframe, message) => {
+    return new Promise((resolve) => {
+      const messageHandler = (event) => {
+        if (event.source === iframe.contentWindow) {
+          window.removeEventListener("message", messageHandler);
+          resolve(event);
+        }
+      };
+      window.addEventListener("message", messageHandler);
+      iframe.contentWindow.postMessage(message, "*");
+    });
+  };
   return {
     init,
     evalInContext,
     processWorkbook,
     getFunctions,
+    runInSandbox,
   };
 }
