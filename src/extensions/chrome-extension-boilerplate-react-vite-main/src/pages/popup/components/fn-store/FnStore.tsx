@@ -30,6 +30,10 @@ import TextField from "@mui/material/TextField";
 import messaging from "./../messaging/messaging";
 import { bool, string } from "prop-types";
 import LibraryDownloader from "@pages/popup/components/fn-store/components/library/LibraryDownloader";
+import LibraryUploader from "@pages/popup/components/fn-store/components/uploader/Uploader";
+import { Button } from "@mui/material";
+import SaveToFileButton from "@pages/popup/components/fn-store/components/downloader/Downloader";
+import UploadIcon from "@mui/icons-material/Upload";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -258,6 +262,8 @@ const FnStore = () => {
   const [templateFunctions, setTemplateFunctions] = useState(null);
   const [excelFunctions, setExcelFunctions] = useState([]);
   const [libraryDownload, setLibraryDownload] = useState(null);
+  const [libraryUpload, setLibraryUpload] = useState(null);
+
   const [tempExcelFunctions, setTempExcelFunctions] = useState({});
 
   useEffect(() => {
@@ -342,6 +348,29 @@ const FnStore = () => {
       />
     );
   };
+  const onUploadFromFile = async () => {
+    setLibraryUpload(
+      <LibraryUploader
+        onClose={() => {
+          setLibraryUpload(null);
+        }}
+        onLoad={async (newTemplateFunctions) => {
+          ll.debug("loading the file library", newTemplateFunctions);
+
+          const mergedFunctions = [
+            ...(newTemplateFunctions || []),
+            ...(excelFunctions || []),
+          ];
+          await store.write(mergedFunctions);
+          ll.debug("stored new function", {
+            mergedFunctions,
+          });
+          await update();
+          setLibraryUpload(null);
+        }}
+      />
+    );
+  };
   const onDelete = async (fnToDelete) => {
     ll.debug("deleting function", fnToDelete);
     await store.deleteEntry(fnToDelete.name);
@@ -389,6 +418,7 @@ const FnStore = () => {
   return (
     <div className="FnStore">
       {libraryDownload}
+      {libraryUpload}
       <CollapsibleTable
         excelFunctions={excelFunctions}
         tempExcelFunctions={tempExcelFunctions}
@@ -421,6 +451,18 @@ const FnStore = () => {
         >
           <CloudDownloadIcon />
         </IconButton>
+        <IconButton
+          style={{
+            display: "flex",
+          }}
+          onClick={onUploadFromFile}
+        >
+          <UploadIcon />
+        </IconButton>
+        <SaveToFileButton
+          data={JSON.stringify(excelFunctions, null, 2)}
+          fileName={"ETT-Functions.json"}
+        />
       </div>
     </div>
   );

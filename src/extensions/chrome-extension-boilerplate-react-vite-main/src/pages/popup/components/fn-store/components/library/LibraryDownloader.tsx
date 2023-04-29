@@ -16,7 +16,6 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 } else {
   ll.setLevel(log.levels.WARN);
 }
-
 function SimpleDialog(props) {
   const { onClose, open, onLoad } = props;
   return (
