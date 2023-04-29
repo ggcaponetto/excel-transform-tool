@@ -77,11 +77,13 @@ const Home = () => {
     })();
   }, []);
   const renderUI = () => {
-    const isPro = isLoading && !!user?.paid;
-    if (isPro && isLoading) {
-      return <LoadingScreen lines={5} styleOverride={{}} />;
+    const isPro = user?.paid === true;
+    if (isPro === false) {
+      if (isLoading || elapsedTime < 3000) {
+        return <LoadingScreen lines={5} styleOverride={{}} />;
+      }
     } else {
-      if (isLoading || elapsedTime < 2000) {
+      if (isLoading || elapsedTime < 1200) {
         return <LoadingScreen lines={5} styleOverride={{}} />;
       }
     }
