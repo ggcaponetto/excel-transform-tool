@@ -1,6 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import ExtPay from "extpay";
-import { Typography, Button, Box, LinearProgress } from "@mui/material";
+import {
+  Typography,
+  Button,
+  Box,
+  LinearProgress,
+  AlertTitle,
+  Alert,
+} from "@mui/material";
 import XLSX, { read, writeFileXLSX, set_cptable } from "xlsx";
 import * as log from "loglevel";
 import ExcelProcessor from "./../process/ExcelProcessor";
@@ -19,6 +26,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress, {
   CircularProgressProps,
 } from "@mui/material/CircularProgress";
+import PopupContext from "@pages/popup/components/context/popup-context";
 
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -26,7 +34,7 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 } else {
   ll.setLevel(log.levels.WARN);
 }
-
+const MAX_CELLS_TO_PROCESS = 40;
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number }
 ) {
@@ -69,7 +77,16 @@ const Transform = () => {
   const [functions, setFunctions] = useState(null);
   const [selectedFunction, setSelectedFunction] = useState(null);
   const hasValidUploadEvent = !!uploadEvent?.target?.files[0]?.name;
+  const popupContext = useContext(PopupContext);
   const inputRef = useRef(null);
+  const isPro = popupContext?.data?.user?.paid === true;
+  const reset = () => {
+    setStatus(initialStatus);
+    setUploadEvent(null);
+    setWorkbook(null);
+    setProcessedWorkbook(null);
+    setSelectedFunction(null);
+  };
   const update = async () => {
     const newProcessor = new ExcelProcessor({}, workbook);
     await newProcessor.init();
@@ -137,21 +154,27 @@ const Transform = () => {
         XLSX.utils.book_append_sheet(newWorkbook, clonedWorksheet);
       });
       ll.debug("New workbook is", newWorkbook);
-      const newProcessedWorkbook = await processor.processWorkbook(
-        functionsArray,
-        (progress) => {
-          ll.debug("Got processing progress", progress);
-          setStatus((p) => {
-            return {
-              ...p,
-              isProcessing: progress.percentage < 100,
-              value: progress.percentage,
-            };
-          });
-        }
-      );
-      ll.debug("Got processed workbook", newProcessedWorkbook);
-      resolve(newProcessedWorkbook);
+      try {
+        const newProcessedWorkbook = await processor.processWorkbook(
+          functionsArray,
+          (progress) => {
+            ll.debug("Got processing progress", progress);
+            setStatus((p) => {
+              return {
+                ...p,
+                isProcessing: progress.percentage < 100,
+                value: progress.percentage,
+              };
+            });
+          },
+          isPro ? Number.POSITIVE_INFINITY : MAX_CELLS_TO_PROCESS
+        );
+        ll.debug("Got processed workbook", newProcessedWorkbook);
+        resolve(newProcessedWorkbook);
+      } catch (e) {
+        ll.error("An unexpected error happened", e);
+        reset();
+      }
     });
   }
 
@@ -234,7 +257,7 @@ const Transform = () => {
           disabled={true}
           label="Function Comment"
           multiline
-          rows={4}
+          rows={2}
           defaultValue=""
           variant="standard"
           value={(() => {
@@ -301,6 +324,22 @@ const Transform = () => {
             >
               Download
             </Button>
+          );
+        }
+      })()}
+      {(() => {
+        if (isPro === false) {
+          return (
+            <Alert
+              severity="info"
+              variant="outlined"
+              style={{ margin: "10px" }}
+            >
+              <strong>
+                The free plan only processes {MAX_CELLS_TO_PROCESS} cells. Get
+                unlimited processing with the Pro plan!
+              </strong>
+            </Alert>
           );
         }
       })()}

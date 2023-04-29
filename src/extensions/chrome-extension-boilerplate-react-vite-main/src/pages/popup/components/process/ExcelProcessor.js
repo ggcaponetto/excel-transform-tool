@@ -83,11 +83,12 @@ export default function ExcelProcessor(context, workbook) {
     evalInContext.call(context);
   };
   const getFunctions = () => this.functions;
-  const processWorkbook = (functions, onProgress) => {
+  const processWorkbook = (functions, onProgress, maxOperations) => {
     return new Promise((resolveProcessing) => {
       ll.debug("processing workbook...", {
         workbook: this.workbook,
         functions,
+        maxOperations,
       });
 
       let workPromises = [];
@@ -103,32 +104,34 @@ export default function ExcelProcessor(context, workbook) {
           ll.debug(
             `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
           );*/
-          workPromises.push(() => {
-            // eslint-disable-next-line no-async-promise-executor
-            return new Promise(async (resolve) => {
-              const iframe = document.getElementById("sanbdox-bridge");
-              const message = {
-                command: "eval",
-                code: functions[0].data,
-                context: {
-                  wb: this.workbook,
-                  cell: splitCell(cellName),
-                  cellName,
-                  sheetName,
-                  cellValue: this.workbook.Sheets[sheetName][cellName].w,
-                  range: getRange(this.workbook.Sheets[sheetName]),
-                },
-              };
-              const evalResponse = await runInSandbox(iframe, message);
-              ll.debug("processor got message from sandbox", evalResponse);
-              XLSX.utils.sheet_add_aoa(
-                this.workbook.Sheets[sheetName],
-                [[evalResponse.data.result]],
-                { origin: cellName }
-              );
-              resolve();
+          if (tempCellCounter <= maxOperations) {
+            workPromises.push(() => {
+              // eslint-disable-next-line no-async-promise-executor
+              return new Promise(async (resolve) => {
+                const iframe = document.getElementById("sanbdox-bridge");
+                const message = {
+                  command: "eval",
+                  code: functions[0].data,
+                  context: {
+                    wb: this.workbook,
+                    cell: splitCell(cellName),
+                    cellName,
+                    sheetName,
+                    cellValue: this.workbook.Sheets[sheetName][cellName].w,
+                    range: getRange(this.workbook.Sheets[sheetName]),
+                  },
+                };
+                const evalResponse = await runInSandbox(iframe, message);
+                ll.debug("processor got message from sandbox", evalResponse);
+                XLSX.utils.sheet_add_aoa(
+                  this.workbook.Sheets[sheetName],
+                  [[evalResponse.data.result]],
+                  { origin: cellName }
+                );
+                resolve();
+              });
             });
-          });
+          }
         }
       }
       let allResults = [];
@@ -137,7 +140,8 @@ export default function ExcelProcessor(context, workbook) {
         for (const x of iterable) {
           counter++;
           let res = await x(2);
-          let percentage = (counter / totalCellCount) * 100;
+          let percentage =
+            (counter / Math.min(totalCellCount, maxOperations)) * 100;
           /*ll.debug(
             `processed cell ${counter}/${totalCellCount} (${percentage.toFixed(
               2
