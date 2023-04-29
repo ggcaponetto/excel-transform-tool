@@ -323,7 +323,8 @@ const FnStore = () => {
           const newTemplateFunctions = templateFunctions.map((f) => {
             return {
               ...f,
-              name: `From library: ${f.name}`,
+              name: `Library: ${f.name}`,
+              editedName: `Library: ${f.name}`,
               createdAt: Date.now(),
             };
           });
