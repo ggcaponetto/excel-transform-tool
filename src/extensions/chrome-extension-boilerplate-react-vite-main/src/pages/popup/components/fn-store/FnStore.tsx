@@ -28,7 +28,7 @@ import process from "process";
 import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
 import TextField from "@mui/material/TextField";
 import messaging from "./../messaging/messaging";
-import { bool } from "prop-types";
+import { bool, string } from "prop-types";
 import LibraryDownloader from "@pages/popup/components/fn-store/components/LibraryDownloader";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -59,11 +59,13 @@ function createData(name, comment, data) {
     name,
     comment,
     data,
+    editedName: undefined,
   };
 }
 
 function Row(props: {
   row: ReturnType<typeof createData>;
+  tempRow: ReturnType<any>;
   onDelete: ReturnType<typeof Function>;
   onEdit: ReturnType<typeof Function>;
   onSave: ReturnType<typeof Function>;
@@ -81,6 +83,25 @@ function Row(props: {
   const onSave = (oldRow, newRow) => {
     props.onSave(oldRow, newRow);
   };
+  useEffect(() => {
+    const originalRow = props.row;
+    const newRow = {
+      ...props.row,
+      ...(props.tempRow || {}),
+      editedName: undefined,
+      name:
+        props?.tempRow?.editedName !== undefined
+          ? props?.tempRow?.editedName
+          : props.row.name,
+    };
+    const isNewEdited = JSON.stringify(originalRow) !== JSON.stringify(newRow);
+    ll.debug("checking if the row is edited", {
+      isNewEdited,
+      originalRow,
+      newRow,
+    });
+    setIsEdited(isNewEdited);
+  }, [props.row, props.tempRow]);
   return (
     <React.Fragment>
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
@@ -97,11 +118,12 @@ function Row(props: {
           <TextField
             id="standard-basic"
             variant="standard"
-            value={props.row.name}
+            value={props?.tempRow?.editedName || props.row.name}
             onChange={(e) => {
               onChange(props.row, {
                 ...props.row,
-                name: e.target.value,
+                ...(props.tempRow || {}),
+                editedName: e.target.value,
               });
             }}
           />
@@ -110,10 +132,11 @@ function Row(props: {
           <TextField
             id="standard-basic"
             variant="standard"
-            value={props.row.comment}
+            value={props?.tempRow?.comment || props.row.comment}
             onChange={(e) => {
               onChange(props.row, {
                 ...props.row,
+                ...(props.tempRow || {}),
                 comment: e.target.value,
               });
             }}
@@ -134,7 +157,10 @@ function Row(props: {
                   disabled={hasJsHintErrors}
                   onClick={() => {
                     ll.debug("onSave");
-                    onSave(props.row, props.row);
+                    onSave(props.row, {
+                      ...props.row,
+                      ...(props.tempRow || {}),
+                    });
                   }}
                 >
                   <SaveIcon></SaveIcon>
@@ -152,9 +178,11 @@ function Row(props: {
           <Collapse in={open} timeout="auto" unmountOnExit={false}>
             <FnEditor
               row={props.row}
+              tempRow={props.tempRow}
               onEdit={(editedContent) => {
                 props.onEdit(props.row, {
                   ...props.row,
+                  ...(props.tempRow || {}),
                   data: editedContent,
                 });
               }}
@@ -186,7 +214,8 @@ export function CollapsibleTable(props) {
           {props.excelFunctions.map((row) => (
             <Row
               key={row.name}
-              row={props.tempExcelFunctions[row.name] || row}
+              row={row}
+              tempRow={props.tempExcelFunctions[row.name]}
               onDelete={props.onDelete}
               onEdit={props.onEdit}
               onSave={props.onSave}
@@ -219,7 +248,7 @@ const FnStore = () => {
   const [tempExcelFunctions, setTempExcelFunctions] = useState({});
 
   useEffect(() => {
-    ll.debug("tempExcelFunctions changes", tempExcelFunctions);
+    ll.debug("tempExcelFunctions changed", tempExcelFunctions);
   }, [tempExcelFunctions]);
 
   useEffect(() => {
@@ -323,9 +352,18 @@ const FnStore = () => {
       newRow,
     });
     await store.deleteEntry(oldRow.name);
-    await store.write([newRow]);
+    /*copy the edited name as name and delete the additional
+     "editedName property" before saving */
+    const newClone = JSON.parse(JSON.stringify(newRow));
+    newClone.name = newRow.editedName;
+    delete newClone.editedName;
+    await store.write([newClone]);
     /* After saving an element, we need to update the temp functions store and remove the edits */
-    setTempExcelFunctions({});
+    setTempExcelFunctions((p) => {
+      const oldState = p;
+      delete oldState[oldRow.name];
+      return oldState;
+    });
     await update();
   };
   return (
