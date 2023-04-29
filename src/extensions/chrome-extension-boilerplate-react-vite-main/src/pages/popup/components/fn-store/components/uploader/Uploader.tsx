@@ -50,7 +50,7 @@ function UploadDialog(props) {
           alignItems: "center",
           justifyContent: "center",
         }}
-      >{`Load the Functions a file`}</DialogTitle>
+      >{`Load the a Functions file (.json)`}</DialogTitle>
       <Box style={{ margin: "15px" }}>
         <div
           style={{
@@ -63,6 +63,7 @@ function UploadDialog(props) {
           <LoadFileButton
             onLoaded={(data) => {
               ll.debug("loaded file content", data);
+              props.onLoad(data);
             }}
           >
             Load from file
