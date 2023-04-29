@@ -25,11 +25,11 @@ import axios from "axios";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
-import FnEditor from "@pages/popup/components/fn-store/components/FnEditor";
+import FnEditor from "@pages/popup/components/fn-store/components/editor/FnEditor";
 import TextField from "@mui/material/TextField";
 import messaging from "./../messaging/messaging";
 import { bool, string } from "prop-types";
-import LibraryDownloader from "@pages/popup/components/fn-store/components/LibraryDownloader";
+import LibraryDownloader from "@pages/popup/components/fn-store/components/library/LibraryDownloader";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);

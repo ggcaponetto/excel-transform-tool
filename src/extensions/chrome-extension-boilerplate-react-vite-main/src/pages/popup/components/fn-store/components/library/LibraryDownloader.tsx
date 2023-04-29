@@ -30,10 +30,12 @@ function SimpleDialog(props) {
       >{`Load the Community's Functions Library`}</DialogTitle>
       <Box style={{ margin: "15px" }}>
         <Typography variant={"body1"}>
-          Loading the Community Functions library will not overwrite your local
-          functions, should there be a name clash. In case of name clashing, you
-          can rename your local function and import the library again.
+          When you load the Community Functions library, any functions you have
+          created locally will not be replaced, even if there are functions with
+          the same name. If there is a name clash, you can simply rename your
+          local function and reload the library to import it again.
         </Typography>
+        <Box style={{ marginTop: "30px" }} />
         <div
           style={{
             display: "flex",
@@ -41,7 +43,6 @@ function SimpleDialog(props) {
             justifyContent: "center",
           }}
         >
-          <Box style={{ marginTop: "30px" }} />
           <Button
             onClick={async () => {
               ll.debug("onLoad clicked");
@@ -50,6 +51,14 @@ function SimpleDialog(props) {
             variant={"contained"}
           >
             Load
+          </Button>
+          <Button
+            style={{ marginLeft: "15px" }}
+            onClick={onClose}
+            variant={"contained"}
+            color="secondary"
+          >
+            Maybe later
           </Button>
         </div>
       </Box>
