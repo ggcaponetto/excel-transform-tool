@@ -1,0 +1,15 @@
+.LoadingScreen {
+    display: flex;
+    flex: 1;
+}
+
+.LoadingScreen .container{
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-left: 180px;
+    margin-right: 180px;
+}

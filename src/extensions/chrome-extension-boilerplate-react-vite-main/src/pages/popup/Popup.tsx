@@ -16,7 +16,16 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 } else {
   ll.setLevel(log.levels.WARN);
 }
-
+/*
+Main
+#217345
+Light
+#4D8F6A
+Dark
+#175030
+Contrast Text
+#fff
+* */
 const darkTheme = createTheme({
   palette: {
     mode: "dark",

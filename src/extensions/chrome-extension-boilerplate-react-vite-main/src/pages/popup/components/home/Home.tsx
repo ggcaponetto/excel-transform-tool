@@ -11,6 +11,7 @@ import BasicTabs from "@pages/popup/components/tabs/Tabs";
 import * as log from "loglevel";
 import Functions from "@pages/popup/components/functions/Functions";
 import PopupContext from "@pages/popup/components/context/popup-context";
+import LoadingScreen from "@pages/loading-screen/LoadingScreen";
 const ll = log.getLogger("Home");
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
@@ -32,7 +33,6 @@ async function getCurrentTab() {
   const [tab] = await chrome.tabs.query(queryOptions);
   return tab;
 }
-
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -68,7 +68,7 @@ const Home = () => {
   }, []);
   const renderUI = () => {
     if (isLoading) {
-      return <LinearProgress></LinearProgress>;
+      return <LoadingScreen />;
     } else {
       return (
         <BasicTabs
