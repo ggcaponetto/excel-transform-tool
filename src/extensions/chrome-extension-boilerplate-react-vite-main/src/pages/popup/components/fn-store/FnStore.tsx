@@ -218,8 +218,11 @@ export function CollapsibleTable(props) {
             .sort((a, b) => {
               if (a.createdAt > b.createdAt) {
                 return 1;
+              } else if (a.createdAt) {
+                return -1;
+              } else {
+                return 0;
               }
-              return -1;
             })
             .map((row) => (
               <Row
@@ -321,6 +324,7 @@ const FnStore = () => {
             return {
               ...f,
               name: `From library: ${f.name}`,
+              createdAt: Date.now(),
             };
           });
           const mergedFunctions = [
