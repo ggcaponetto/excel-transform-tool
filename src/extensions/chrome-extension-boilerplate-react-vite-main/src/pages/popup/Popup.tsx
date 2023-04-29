@@ -8,6 +8,7 @@ import { themes } from "@pages/popup/components/settings/Settings";
 import * as log from "loglevel";
 const ll = log.getLogger("Popup.tsx");
 import process from "process";
+import ExtPay from "extpay";
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -19,16 +20,41 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 const darkTheme = createTheme({
   palette: {
     mode: "dark",
+    primary: {
+      main: "#217345",
+    },
+    secondary: {
+      main: "#ce93d8",
+    },
+    info: {
+      main: "#a5d6a7",
+    },
+    success: {
+      main: "#80deea",
+    },
   },
 });
 const lightTheme = createTheme({
   palette: {
     mode: "light",
+    primary: {
+      main: "#217345",
+    },
+    secondary: {
+      main: "#ce93d8",
+    },
+    info: {
+      main: "#a5d6a7",
+    },
+    success: {
+      main: "#80deea",
+    },
   },
 });
 
 function MUITheme(props) {
   const [theme, setTheme] = useState(themes.dark);
+  const [data, setData] = useState({});
   return (
     <PopupContext.Provider
       value={{
@@ -36,6 +62,8 @@ function MUITheme(props) {
           ll.debug("setting theme to", newTheme);
           setTheme(newTheme);
         },
+        data,
+        setData,
       }}
     >
       <ThemeProvider theme={theme.name === "dark" ? darkTheme : lightTheme}>

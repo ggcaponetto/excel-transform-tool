@@ -4,7 +4,7 @@ const ll = log.getLogger("FnStore");
 import process from "process";
 import XLSX from "xlsx";
 import Store from "../store/store";
-import storeIndices from "./../fn-store/FnStore";
+import { storeIndices } from "./../fn-store/FnStore";
 
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -23,7 +23,10 @@ export default function ExcelProcessor(context, workbook) {
   this.functions = null;
   const init = async () => {
     const dbInstance = await this.store.open((objectStore) => {
-      ll.debug("creating store indices for the functions component");
+      ll.debug(
+        "creating store indices for the functions component",
+        storeIndices
+      );
       storeIndices.forEach((index) => {
         objectStore.createIndex(index.name, index.name, {
           unique: index.unique,

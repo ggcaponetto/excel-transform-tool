@@ -143,6 +143,51 @@ const FunctionStore = () => {
       </Button>
     </div>
   );
+
+  /*return (
+    <div>
+      <div>all good, you paid. here is your reward.</div>
+      <Button
+        onClick={async () => {
+          chrome.runtime.sendMessage({ greeting: "hello" }, (response) => {
+            ll.debug("got message back", response);
+          });
+        }}
+      >
+        SEND TASK TO BG
+      </Button>
+      <Button
+        onClick={() => {
+          (async () => {
+            const [tab] = await chrome.tabs.query({
+              active: true,
+              lastFocusedWindow: true,
+            });
+            if (tab.id !== undefined) {
+              const response = await chrome.tabs.sendMessage(tab.id, {
+                greeting: "hello",
+              });
+              // do something with response here, not outside the function
+              ll.debug(
+                "got back response from content script: ",
+                response
+              );
+            }
+          })();
+        }}
+      >
+        SEND TASK TO CONTENT SCRIPT
+      </Button>
+      <Button
+        onClick={async () => {
+          const myDataResponse = await API.makeRequest({ hello: "world" });
+          ll.debug("got response form private endpoint", myDataResponse);
+        }}
+      >
+        PRIVATE ENDPOINT
+      </Button>
+    </div>
+  );*/
 };
 
 export default FunctionStore;

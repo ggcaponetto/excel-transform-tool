@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ExtPay from "extpay";
 import { Typography, Button, LinearProgress } from "@mui/material";
 import API from "../api/API";
@@ -10,6 +10,7 @@ import Settings from "../settings/Settings";
 import BasicTabs from "@pages/popup/components/tabs/Tabs";
 import * as log from "loglevel";
 import Functions from "@pages/popup/components/functions/Functions";
+import PopupContext from "@pages/popup/components/context/popup-context";
 const ll = log.getLogger("Home");
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
@@ -35,7 +36,7 @@ async function getCurrentTab() {
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-
+  const popupContext = useContext(PopupContext);
   useEffect(() => {
     chrome.runtime.onMessage.addListener(function (
       request,
@@ -51,6 +52,9 @@ const Home = () => {
   useEffect(() => {
     if (user) {
       ll.debug("user changed", user);
+      popupContext.setData({
+        user,
+      });
     }
   }, [user]);
 
@@ -62,10 +66,10 @@ const Home = () => {
       setUser(myUser);
     })();
   }, []);
-  const renderPaymentStatus = (user) => {
+  const renderUI = () => {
     if (isLoading) {
       return <LinearProgress></LinearProgress>;
-    } else if (user && user.paid) {
+    } else {
       return (
         <BasicTabs
           titles={[
@@ -80,55 +84,9 @@ const Home = () => {
           components={[<Transform />, <Functions />, <Settings />]}
         />
       );
-      /*return (
-        <div>
-          <div>all good, you paid. here is your reward.</div>
-          <Button
-            onClick={async () => {
-              chrome.runtime.sendMessage({ greeting: "hello" }, (response) => {
-                ll.debug("got message back", response);
-              });
-            }}
-          >
-            SEND TASK TO BG
-          </Button>
-          <Button
-            onClick={() => {
-              (async () => {
-                const [tab] = await chrome.tabs.query({
-                  active: true,
-                  lastFocusedWindow: true,
-                });
-                if (tab.id !== undefined) {
-                  const response = await chrome.tabs.sendMessage(tab.id, {
-                    greeting: "hello",
-                  });
-                  // do something with response here, not outside the function
-                  ll.debug(
-                    "got back response from content script: ",
-                    response
-                  );
-                }
-              })();
-            }}
-          >
-            SEND TASK TO CONTENT SCRIPT
-          </Button>
-          <Button
-            onClick={async () => {
-              const myDataResponse = await API.makeRequest({ hello: "world" });
-              ll.debug("got response form private endpoint", myDataResponse);
-            }}
-          >
-            PRIVATE ENDPOINT
-          </Button>
-        </div>
-      );*/
-    } else {
-      return <Button onClick={extpay.openPaymentPage}>pay now</Button>;
     }
   };
-  return <div className="Home">{renderPaymentStatus(user)}</div>;
+  return <div className="Home">{renderUI()}</div>;
 };
 
 export default Home;

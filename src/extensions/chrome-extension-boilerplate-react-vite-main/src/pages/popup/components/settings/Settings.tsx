@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Store from "../store/store";
-import { Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
@@ -8,10 +8,11 @@ import PopupContext from "@pages/popup/components/context/popup-context";
 import * as log from "loglevel";
 import "./Settins.css";
 import Divider from "@mui/material/Divider";
-const ll = log.getLogger("Settings");
-
 import process from "process";
 import FnStore from "@pages/popup/components/fn-store/FnStore";
+import ExtPay from "extpay";
+const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
+const ll = log.getLogger("Settings");
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -104,6 +105,26 @@ const Settings = () => {
           />
           Light
         </FormGroup>
+      </div>
+      <Box style={{ marginTop: "30px" }}></Box>
+      <div>
+        <Typography variant={"h6"}>Plan and Billing</Typography>
+        <Box style={{ marginTop: "10px" }}></Box>
+        {(() => {
+          if (popupContext?.data?.user?.email !== undefined) {
+            return (
+              <div>Licensed to: {popupContext?.data?.user?.email || "N/A"}</div>
+            );
+          }
+        })()}
+        <div>
+          Current plan:{" "}
+          {popupContext?.data?.user?.paid === true ? "Pro" : "Free"}
+        </div>
+        <Box style={{ marginTop: "10px" }}></Box>
+        <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+          Upgrade to Pro
+        </Button>
       </div>
     </div>
   );
