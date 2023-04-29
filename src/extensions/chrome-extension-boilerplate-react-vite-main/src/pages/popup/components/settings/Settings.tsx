@@ -11,6 +11,7 @@ import Divider from "@mui/material/Divider";
 import process from "process";
 import FnStore from "@pages/popup/components/fn-store/FnStore";
 import ExtPay from "extpay";
+import LoadingScreen from "@pages/popup/components/loading-screen/LoadingScreen";
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 const ll = log.getLogger("Settings");
 
@@ -82,6 +83,13 @@ const Settings = () => {
   };
   return (
     <div className="Settings" style={{ padding: 0 }}>
+      <div style={{ maxWidth: "50%" }}>
+        <LoadingScreen
+          lines={1}
+          shorteningAmount={18}
+          imageScale={0.4}
+        ></LoadingScreen>
+      </div>
       <Typography variant={"h6"}>Theme</Typography>
       <div
         style={{
@@ -126,6 +134,7 @@ const Settings = () => {
           Upgrade to Pro
         </Button>
       </div>
+      <Box style={{ margin: "45px" }}></Box>
     </div>
   );
 };

@@ -11,7 +11,7 @@ import BasicTabs from "@pages/popup/components/tabs/Tabs";
 import * as log from "loglevel";
 import Functions from "@pages/popup/components/functions/Functions";
 import PopupContext from "@pages/popup/components/context/popup-context";
-import LoadingScreen from "@pages/loading-screen/LoadingScreen";
+import LoadingScreen from "@pages/popup/components/loading-screen/LoadingScreen";
 const ll = log.getLogger("Home");
 const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
@@ -37,6 +37,16 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const popupContext = useContext(PopupContext);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  useEffect(() => {
+    const onTimePasses = () => {
+      setElapsedTime((p) => p + 1000);
+    };
+    const handle = setInterval(onTimePasses, 1000);
+    return () => {
+      clearInterval(handle);
+    };
+  }, []);
   useEffect(() => {
     chrome.runtime.onMessage.addListener(function (
       request,
@@ -67,24 +77,28 @@ const Home = () => {
     })();
   }, []);
   const renderUI = () => {
-    if (isLoading) {
-      return <LoadingScreen />;
+    const isPro = isLoading && !!user?.paid;
+    if (isPro && isLoading) {
+      return <LoadingScreen lines={5} styleOverride={{}} />;
     } else {
-      return (
-        <BasicTabs
-          titles={[
-            // eslint-disable-next-line react/jsx-key
-            <div>tranform</div>,
-            // eslint-disable-next-line react/jsx-key
-            <div>functions</div>,
-            // eslint-disable-next-line react/jsx-key
-            <div>settings</div>,
-          ]}
-          // eslint-disable-next-line react/jsx-key
-          components={[<Transform />, <Functions />, <Settings />]}
-        />
-      );
+      if (isLoading || elapsedTime < 2000) {
+        return <LoadingScreen lines={5} styleOverride={{}} />;
+      }
     }
+    return (
+      <BasicTabs
+        titles={[
+          // eslint-disable-next-line react/jsx-key
+          <div>tranform</div>,
+          // eslint-disable-next-line react/jsx-key
+          <div>functions</div>,
+          // eslint-disable-next-line react/jsx-key
+          <div>settings</div>,
+        ]}
+        // eslint-disable-next-line react/jsx-key
+        components={[<Transform />, <Functions />, <Settings />]}
+      />
+    );
   };
   return <div className="Home">{renderUI()}</div>;
 };

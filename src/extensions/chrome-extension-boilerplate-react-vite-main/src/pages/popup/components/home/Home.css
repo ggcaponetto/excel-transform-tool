@@ -3,6 +3,8 @@
     display: flex;
     flex-direction: column;
     overflow: auto;
+    align-items: center;
+    justify-content: center;
 }
 .Home > .MuiBox-root{
     display: flex;

@@ -1,14 +1,15 @@
 import { Box, LinearProgress, Typography } from "@mui/material";
 import React from "react";
 import "./LoadingScreen.css";
-import logo from "./../../assets/img/Logo-cropped.png";
-import packageJson from "../../../package.json";
+import logo from "@assets/img/Logo-cropped.png";
+import packageJson from "../../../../../package.json";
 export default function LoadingScreen(props) {
-  const lines = 10;
+  const lines = props.lines || 10;
   const array = Array.from(Array(lines).keys());
-  const shorteningAmount = 10;
+  const shorteningAmount = props.shorteningAmount || 10;
+  const imageScale = props.imageScale || 1;
   return (
-    <div className={"LoadingScreen"}>
+    <div className={"LoadingScreen"} style={{ ...(props.styleOverride || {}) }}>
       <div className={"container"}>
         {array
           .map((index) => {
@@ -24,9 +25,16 @@ export default function LoadingScreen(props) {
           .reverse()}
         <img
           src={logo}
-          style={{ width: "100%", maxWidth: "160px", marginTop: "-30px" }}
+          style={{
+            maxHeight: imageScale * 100 + "%",
+            maxWidth: "160px",
+          }}
         />
-        <Typography variant={"body1"} style={{ marginTop: "-40px" }}>
+        <Typography variant={"body1"}>Excel Transform Toolkit</Typography>
+        <Typography
+          variant={"body1"}
+          style={{ fontSize: "small", opacity: 0.5 }}
+        >
           Version {packageJson.version}
         </Typography>
         {array.map((index) => {
