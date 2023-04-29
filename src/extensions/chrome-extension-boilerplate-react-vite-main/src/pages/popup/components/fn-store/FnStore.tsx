@@ -39,10 +39,11 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 
 ll.debug("jshint import", JSHINT);
 
-const defaultFunction = createData(
-  "New Function",
-  "A simple function that makes an API call for the column B.",
-  `const run = async () => {
+const getDefaultFunction = () =>
+  createData(
+    "New Function",
+    "A simple function that makes an API call for the column B.",
+    `const run = async () => {
     const cellName = this.cellName;
     const column = this.cell.column;
     if(column === "B"){
@@ -52,14 +53,16 @@ const defaultFunction = createData(
     }
     return this.cellValue;
   };
-run().then(data => { console.log(data); return data; });`
-);
-function createData(name, comment, data) {
+run().then(data => { console.log(data); return data; });`,
+    Date.now()
+  );
+function createData(name, comment, data, createdAt) {
   return {
     name,
     comment,
     data,
     editedName: undefined,
+    createdAt,
   };
 }
 
@@ -211,17 +214,24 @@ export function CollapsibleTable(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {props.excelFunctions.map((row) => (
-            <Row
-              key={row.name}
-              row={row}
-              tempRow={props.tempExcelFunctions[row.name]}
-              onDelete={props.onDelete}
-              onEdit={props.onEdit}
-              onSave={props.onSave}
-              tempExcelFunctions={props.tempExcelFunctions}
-            />
-          ))}
+          {props.excelFunctions
+            .sort((a, b) => {
+              if (a.createdAt > b.createdAt) {
+                return 1;
+              }
+              return -1;
+            })
+            .map((row) => (
+              <Row
+                key={row.name}
+                row={row}
+                tempRow={props.tempExcelFunctions[row.name]}
+                onDelete={props.onDelete}
+                onEdit={props.onEdit}
+                onSave={props.onSave}
+                tempExcelFunctions={props.tempExcelFunctions}
+              />
+            ))}
         </TableBody>
       </Table>
     </TableContainer>
@@ -289,6 +299,7 @@ const FnStore = () => {
     );
   }, [excelFunctions]);
   const onCreateNew = async () => {
+    const defaultFunction = getDefaultFunction();
     await store.write([
       {
         ...defaultFunction,
@@ -318,7 +329,6 @@ const FnStore = () => {
           ];
           await store.write(mergedFunctions);
           ll.debug("stored new function", {
-            defaultFunction,
             mergedFunctions,
           });
           await update();
@@ -347,17 +357,22 @@ const FnStore = () => {
     });
   };
   const onSave = async (oldRow, newRow) => {
+    const newClone = JSON.parse(JSON.stringify(newRow));
     ll.debug("about to save a function", {
       oldRow,
       newRow,
+      newClone,
     });
-    await store.deleteEntry(oldRow.name);
+    await store.deleteEntry(oldRow.name).catch((e) => {
+      ll.info(`could not delete ${oldRow.name}`, e);
+    });
     /*copy the edited name as name and delete the additional
      "editedName property" before saving */
-    const newClone = JSON.parse(JSON.stringify(newRow));
-    newClone.name = newRow.editedName;
+    newClone.name = newClone.editedName;
     delete newClone.editedName;
-    await store.write([newClone]);
+    await store.write([newClone]).catch((e) => {
+      ll.info(`could not write ${newClone.name}`, e);
+    });
     /* After saving an element, we need to update the temp functions store and remove the edits */
     setTempExcelFunctions((p) => {
       const oldState = p;
