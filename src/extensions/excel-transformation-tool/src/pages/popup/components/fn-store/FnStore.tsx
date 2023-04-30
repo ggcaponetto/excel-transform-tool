@@ -150,6 +150,7 @@ function Row(props: {
             onClick={() => {
               props.onDelete(row);
             }}
+            color="error"
           >
             <DeleteIcon></DeleteIcon>
           </IconButton>
@@ -158,6 +159,7 @@ function Row(props: {
               return (
                 <IconButton
                   disabled={hasJsHintErrors}
+                  color="primary"
                   onClick={() => {
                     ll.debug("onSave");
                     onSave(props.row, {
@@ -449,6 +451,7 @@ const FnStore = () => {
             display: "flex",
           }}
           onClick={onCreateNew}
+          color="secondary"
         >
           <AddCircleIcon />
         </IconButton>

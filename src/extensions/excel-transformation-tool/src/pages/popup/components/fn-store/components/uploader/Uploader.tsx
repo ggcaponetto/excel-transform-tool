@@ -51,7 +51,7 @@ function UploadDialog(props) {
           alignItems: "center",
           justifyContent: "center",
         }}
-      >{`Load the a Functions file (.json)`}</DialogTitle>
+      >{`Load Functions from file (.json)`}</DialogTitle>
       <Box style={{ margin: "15px" }}>
         <div
           style={{

@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension-boilerplate-react-vite",
-  "version": "0.0.1",
-  "description": "chrome extension boilerplate",
+  "name": "excel-transformation-tool",
+  "version": "0.1.0",
+  "description": "A Chrome Plugin to bring JavaScript functionalities to spreasheets",
   "license": "MIT",
   "repository": {
     "type": "git",
