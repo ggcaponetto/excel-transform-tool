@@ -1,6 +1,9 @@
 # Excel Transformation Tool
 
-A Chrome Plugin to bring JavaScript functionalities to spreasheets.
+A Chrome Plugin to bring JavaScript functionalities to spreasheets. Modify each cell of your spreadsheet with
+ easy JavaScript and perform complex tasks.
+
+More infos on [https://excel-transformation-tool.com/](https://excel-transformation-tool.com/)
 
 Create a the ``src/extensions/excel-transformation-tool/.env`` file containing the
 environment variables:
