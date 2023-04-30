@@ -85,7 +85,7 @@ const Settings = () => {
     <div className="Settings" style={{ padding: 0 }}>
       <div style={{ maxWidth: "50%" }}>
         <LoadingScreen
-          lines={1}
+          lines={0}
           shorteningAmount={18}
           imageScale={0.4}
         ></LoadingScreen>

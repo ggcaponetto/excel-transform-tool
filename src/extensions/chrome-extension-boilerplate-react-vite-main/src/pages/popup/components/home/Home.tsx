@@ -38,11 +38,30 @@ const Home = () => {
   const [user, setUser] = useState(null);
   const popupContext = useContext(PopupContext);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [timeHandle, setTimeHandle] = useState(null);
+  const waitingTime = {
+    free: 1500,
+    pro: 800,
+  };
   useEffect(() => {
     const onTimePasses = () => {
-      setElapsedTime((p) => p + 1000);
+      setElapsedTime((p) => {
+        const newTime = p + 100;
+        const isPro = user?.paid === true;
+        if (isPro === false) {
+          if (newTime >= waitingTime.free) {
+            clearInterval(handle);
+          }
+        } else {
+          if (newTime >= waitingTime.pro) {
+            clearInterval(handle);
+          }
+        }
+        return newTime;
+      });
     };
-    const handle = setInterval(onTimePasses, 1000);
+    const handle = setInterval(onTimePasses, 100);
+    setTimeHandle(handle);
     return () => {
       clearInterval(handle);
     };
@@ -79,11 +98,11 @@ const Home = () => {
   const renderUI = () => {
     const isPro = user?.paid === true;
     if (isPro === false) {
-      if (isLoading || elapsedTime < 3000) {
+      if (isLoading || elapsedTime < waitingTime.free) {
         return <LoadingScreen lines={5} styleOverride={{}} />;
       }
     } else {
-      if (isLoading || elapsedTime < 1200) {
+      if (isLoading || elapsedTime < waitingTime.pro) {
         return <LoadingScreen lines={5} styleOverride={{}} />;
       }
     }

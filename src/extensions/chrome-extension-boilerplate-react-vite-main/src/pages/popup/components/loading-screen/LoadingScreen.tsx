@@ -4,7 +4,7 @@ import "./LoadingScreen.css";
 import logo from "@assets/img/Logo-cropped.png";
 import packageJson from "../../../../../package.json";
 export default function LoadingScreen(props) {
-  const lines = props.lines || 10;
+  const lines = props.lines;
   const array = Array.from(Array(lines).keys());
   const shorteningAmount = props.shorteningAmount || 10;
   const imageScale = props.imageScale || 1;
@@ -30,7 +30,7 @@ export default function LoadingScreen(props) {
             maxWidth: "160px",
           }}
         />
-        <Typography variant={"body1"}>Excel Transform Toolkit</Typography>
+        <Typography variant={"body1"}>Excel Transformation Tool</Typography>
         <Typography
           variant={"body1"}
           style={{ fontSize: "small", opacity: 0.5 }}
