@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Store from "../store/store";
 import * as log from "loglevel";
-import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
 import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
@@ -10,7 +9,6 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
@@ -28,10 +26,8 @@ import process from "process";
 import FnEditor from "@pages/popup/components/fn-store/components/editor/FnEditor";
 import TextField from "@mui/material/TextField";
 import messaging from "./../messaging/messaging";
-import { bool, string } from "prop-types";
 import LibraryDownloader from "@pages/popup/components/fn-store/components/library/LibraryDownloader";
 import LibraryUploader from "@pages/popup/components/fn-store/components/uploader/Uploader";
-import { Button } from "@mui/material";
 import SaveToFileButton from "@pages/popup/components/fn-store/components/downloader/Downloader";
 import UploadIcon from "@mui/icons-material/Upload";
 const isLogsEnabled = true;
@@ -205,6 +201,12 @@ function Row(props: {
 }
 
 export function CollapsibleTable(props) {
+  useEffect(() => {
+    ll.debug(
+      "CollapsibleTable - props.excelFunctions changes",
+      props.excelFunctions
+    );
+  }, [props.excelFunctions]);
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
@@ -220,12 +222,12 @@ export function CollapsibleTable(props) {
         <TableBody>
           {props.excelFunctions
             .sort((a, b) => {
-              if (a.createdAt > b.createdAt) {
+              if (a.name > b.name) {
                 return 1;
-              } else if (a.createdAt) {
+              } else if (a.name) {
                 return -1;
               } else {
-                return a.name > b.name;
+                return 0;
               }
             })
             .map((row) => (
@@ -329,8 +331,8 @@ const FnStore = () => {
           const newTemplateFunctions = templateFunctions.map((f) => {
             return {
               ...f,
-              name: `Library: ${f.name}`,
-              editedName: `Library: ${f.name}`,
+              name: f.name,
+              editedName: f.name,
               createdAt: Date.now(),
             };
           });
@@ -354,9 +356,9 @@ const FnStore = () => {
         onClose={() => {
           setLibraryUpload(null);
         }}
-        onLoad={async (templateFunctions) => {
-          ll.debug("loading the file library", templateFunctions);
-          const newTemplateFunctions = templateFunctions.map((f, i) => {
+        onLoad={async (newFunctions) => {
+          ll.debug("loading the file library", newFunctions);
+          const importedFunctions = newFunctions.map((f) => {
             return {
               ...f,
               name: `Library: ${f.name}`,
@@ -365,7 +367,7 @@ const FnStore = () => {
             };
           });
           const mergedFunctions = [
-            ...(newTemplateFunctions || []),
+            ...(importedFunctions || []),
             ...(excelFunctions || []),
           ];
           await store.write(mergedFunctions);
