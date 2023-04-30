@@ -32,7 +32,7 @@ function SimpleDialog(props) {
           When you load the Community Functions library, any functions you have
           created locally will not be replaced, even if there are functions with
           the same name. If there is a name clash, you can simply rename your
-          local function and reload the library to import it again.
+          local function first and import the community library again.
         </Typography>
         <Box style={{ marginTop: "30px" }} />
         <div

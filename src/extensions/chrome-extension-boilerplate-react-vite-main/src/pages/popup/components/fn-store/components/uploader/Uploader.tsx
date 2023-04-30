@@ -8,6 +8,7 @@ const ll = log.getLogger("LibraryDownloader");
 import process from "process";
 import { Box, Button } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -58,8 +59,16 @@ function UploadDialog(props) {
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
+            flexDirection: "column",
           }}
         >
+          <Typography variant={"body1"}>
+            When you load Functions from a local file, any functions you have
+            created locally will not be replaced, even if there are functions
+            with the same name. If there is a name clash, you can simply rename
+            your local function first and re-upload the file again.
+          </Typography>
+          <Box style={{ marginTop: "30px" }} />
           <LoadFileButton
             onLoaded={(data) => {
               ll.debug("loaded file content", data);
