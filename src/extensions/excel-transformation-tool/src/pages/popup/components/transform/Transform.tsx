@@ -327,21 +327,9 @@ const Transform = () => {
                 unlimited processing with the PRO plan!
               </strong>
                 <Box style={{ marginTop: "15px" }}></Box>
-                {(() => {
-                    if (popupContext?.data?.user?.paid === true) {
-                        return (
-                            <Button variant={"contained"} onClick={extpay.openPaymentPage}>
-                                Upgrade to PRO
-                            </Button>
-                        );
-                    } else {
-                        return (
-                            <Button variant={"contained"} onClick={extpay.openPaymentPage}>
-                                Manage plan / Cancel plan
-                            </Button>
-                        );
-                    }
-                })()}
+                <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                    Upgrade to PRO
+                </Button>
             </Alert>
           );
         }
