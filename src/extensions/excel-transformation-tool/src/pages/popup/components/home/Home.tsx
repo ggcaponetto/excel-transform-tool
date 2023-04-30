@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import ExtPay from "extpay";
-import { Typography, Button, LinearProgress } from "@mui/material";
+import {Typography, Button, LinearProgress, ListItem, List} from "@mui/material";
 import API from "../api/API";
 import axios from "axios";
 import "./Home.css";
@@ -8,6 +8,7 @@ import * as process from "process";
 import Transform from "../transform/Transform";
 import Settings from "../settings/Settings";
 import BasicTabs from "@pages/popup/components/tabs/Tabs";
+import Tutorial from "@pages/popup/components/tutorial/Tutorial";
 import * as log from "loglevel";
 import Functions from "@pages/popup/components/functions/Functions";
 import PopupContext from "@pages/popup/components/context/popup-context";
@@ -25,13 +26,6 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 async function getUser() {
   const user = await extpay.getUser();
   return user;
-}
-
-async function getCurrentTab() {
-  const queryOptions = { active: true, currentWindow: true };
-  // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  const [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
 }
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -110,14 +104,15 @@ const Home = () => {
       <BasicTabs
         titles={[
           // eslint-disable-next-line react/jsx-key
-          <div>tranform</div>,
+          <div>Tranform</div>,
           // eslint-disable-next-line react/jsx-key
-          <div>functions</div>,
+          <div>Functions</div>,
           // eslint-disable-next-line react/jsx-key
-          <div>settings</div>,
+          <div>Settings</div>,
+          <div>Tutorial</div>,
         ]}
         // eslint-disable-next-line react/jsx-key
-        components={[<Transform />, <Functions />, <Settings />]}
+        components={[<Transform />, <Functions />, <Settings />, <Tutorial />]}
       />
     );
   };

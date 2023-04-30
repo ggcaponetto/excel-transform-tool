@@ -4,6 +4,8 @@ import XLSX, { read } from "xlsx";
 import * as log from "loglevel";
 import ExcelProcessor from "./../process/ExcelProcessor";
 import "./Transform.css";
+import ExtPay from "extpay";
+const extpay = ExtPay(process.env.VITE_EXTENSIONPAY_ID);
 
 const ll = log.getLogger("Transform");
 import process from "process";
@@ -25,7 +27,7 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 } else {
   ll.setLevel(log.levels.WARN);
 }
-const MAX_CELLS_TO_PROCESS = 40;
+const MAX_CELLS_TO_PROCESS = 10*200;
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number }
 ) {
@@ -322,8 +324,24 @@ const Transform = () => {
             >
               <strong>
                 The free plan only processes {MAX_CELLS_TO_PROCESS} cells. Get
-                unlimited processing with the Pro plan!
+                unlimited processing with the PRO plan!
               </strong>
+                <Box style={{ marginTop: "15px" }}></Box>
+                {(() => {
+                    if (popupContext?.data?.user?.paid === true) {
+                        return (
+                            <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                                Upgrade to PRO
+                            </Button>
+                        );
+                    } else {
+                        return (
+                            <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                                Manage plan / Cancel plan
+                            </Button>
+                        );
+                    }
+                })()}
             </Alert>
           );
         }

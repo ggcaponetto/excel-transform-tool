@@ -9,15 +9,9 @@
     overflow: auto;
 }
 
-.Home > .MuiBox-root .custom-tab > div{
-    height: 100%;
-}
-.Home > .MuiBox-root .custom-tab > div > div{
-    height: 100%;
-}
-.Home > .MuiBox-root .custom-tab > div > div > p{
-    height: 100%;
-}
-.Home > .MuiBox-root .custom-tab > div > div > p > div{
-    height: 100%;
+.Home .header-container{
+    display: flex;
+    flex-direction: revert;
+    align-items: center;
+    justify-content: center;
 }

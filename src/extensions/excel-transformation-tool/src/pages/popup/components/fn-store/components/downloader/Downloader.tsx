@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@mui/material";
+import {Button, Tooltip} from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import SaveIcon from "@mui/icons-material/Save";
@@ -18,14 +18,16 @@ function SaveToFileButton({ data, fileName }) {
   };
 
   return (
-    <IconButton
-      style={{
-        display: "flex",
-      }}
-      onClick={handleClick}
-    >
-      <SaveIcon />
-    </IconButton>
+      <Tooltip title="Downloads the functions to a local .json file">
+        <IconButton
+            style={{
+              display: "flex",
+            }}
+            onClick={handleClick}
+        >
+          <SaveIcon />
+        </IconButton>
+      </Tooltip>
   );
 }
 

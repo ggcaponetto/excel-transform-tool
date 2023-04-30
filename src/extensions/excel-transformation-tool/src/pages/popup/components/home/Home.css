@@ -15,4 +15,5 @@
 .Home > .MuiBox-root > .MuiBox-root{
     display: flex;
     flex-direction: column;
+    flex-direction: row;
 }

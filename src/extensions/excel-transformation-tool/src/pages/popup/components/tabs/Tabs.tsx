@@ -4,6 +4,10 @@ import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import "./Tabs.css";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import logo from "@assets/img/Logo-cropped.png";
+
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -42,7 +46,17 @@ export default function BasicTabs(props) {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider" }} className={"header-container"}>
+        <IconButton onClick={()=>{
+          window.open("https://excel-transformation-tool.com/", "_blank");
+        }}>
+          <img
+              src={logo}
+              style={{
+                maxWidth: "30px",
+              }}
+          />
+        </IconButton>
         <Tabs
           centered
           value={value}

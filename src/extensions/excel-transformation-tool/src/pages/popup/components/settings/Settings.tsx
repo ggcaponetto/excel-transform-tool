@@ -127,12 +127,24 @@ const Settings = () => {
         })()}
         <div>
           Current plan:{" "}
-          {popupContext?.data?.user?.paid === true ? "Pro" : "Free"}
+          {popupContext?.data?.user?.paid === true ? "PRO" : "FREE"}
         </div>
         <Box style={{ marginTop: "10px" }}></Box>
-        <Button variant={"contained"} onClick={extpay.openPaymentPage}>
-          Upgrade to Pro
-        </Button>
+        {(() => {
+          if (popupContext?.data?.user?.paid === false) {
+            return (
+                <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                  Upgrade to PRO
+                </Button>
+            );
+          } else {
+            return (
+                <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                  Manage plan / Cancel plan
+                </Button>
+            );
+          }
+        })()}
       </div>
       <Box style={{ margin: "45px" }}></Box>
     </div>
