@@ -244,14 +244,8 @@ const Transform = () => {
           })}
         </Select>
         <Box style={{ marginTop: "15px" }}></Box>
-        <TextField
-          disabled={true}
-          label="Function Comment"
-          multiline
-          rows={2}
-          defaultValue=""
-          variant="standard"
-          value={(() => {
+        <Typography variant={"body1"}>
+          {(() => {
             const func = (functions || []).filter(
               (f) => f.name === selectedFunction
             )[0];
@@ -261,7 +255,7 @@ const Transform = () => {
               return "";
             }
           })()}
-        />
+        </Typography>
       </FormControl>
       <Box style={{ marginTop: "30px" }}></Box>
       <Button

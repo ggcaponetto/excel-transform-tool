@@ -225,7 +225,7 @@ export function CollapsibleTable(props) {
               } else if (a.createdAt) {
                 return -1;
               } else {
-                return 0;
+                return a.name > b.name;
               }
             })
             .map((row) => (
@@ -354,9 +354,16 @@ const FnStore = () => {
         onClose={() => {
           setLibraryUpload(null);
         }}
-        onLoad={async (newTemplateFunctions) => {
-          ll.debug("loading the file library", newTemplateFunctions);
-
+        onLoad={async (templateFunctions) => {
+          ll.debug("loading the file library", templateFunctions);
+          const newTemplateFunctions = templateFunctions.map((f, i) => {
+            return {
+              ...f,
+              name: `Library: ${f.name}`,
+              editedName: `Library: ${f.name}`,
+              createdAt: Date.now(),
+            };
+          });
           const mergedFunctions = [
             ...(newTemplateFunctions || []),
             ...(excelFunctions || []),
@@ -402,7 +409,7 @@ const FnStore = () => {
     });
     /*copy the edited name as name and delete the additional
      "editedName property" before saving */
-    newClone.name = newClone.editedName;
+    newClone.name = newClone.editedName || oldRow.name;
     delete newClone.editedName;
     await store.write([newClone]).catch((e) => {
       ll.info(`could not write ${newClone.name}`, e);
