@@ -422,7 +422,8 @@ const FnStore = () => {
     });
     /*copy the edited name as name and delete the additional
      "editedName property" before saving */
-    newClone.name = newClone.editedName || oldRow.name;
+    newClone.name =
+      newClone.editedName !== undefined ? newClone.editedName : oldRow.name;
     delete newClone.editedName;
     await store.write([newClone]).catch((e) => {
       ll.info(`could not write ${newClone.name}`, e);
