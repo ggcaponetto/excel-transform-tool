@@ -17,6 +17,11 @@ shiki.getHighlighter({
     const out = `
     <title>Shiki</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+    * {
+        font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;;
+    }
+    </style>
     ${html}
     <script src="index.js"></script>
   `
