@@ -8,12 +8,21 @@ These functions will run in a special context where you will have access to the 
 
 ````javascript
 const runOnCell = async () => {
-    const workbook = this.wb; // https://docs.sheetjs.com/docs/csf/book
-    const cell = this.cell; // e.g. { row: 15, column: "A" }
-    const cellName = this.cellName; // e.g. "A15"
-    const sheetName = this.sheetName; // "MySheet"
-    const cellValue = this.cellValue; // "Hello World"
-    const range = this.range; // row count --> range.e.r, column count --> range.e.c
+    /* https://docs.sheetjs.com/docs/csf/book */
+    const workbook = this.wb;
+    /* e.g. { row: 15, column: "A" } */
+    const cell = this.cell;
+    /* e.g. "A15" */
+    const cellName = this.cellName;
+    /* e.g. "MySheet" */
+    const sheetName = this.sheetName;
+    /* e.g. "Hello World!" */
+    const cellValue = this.cellValue;
+    /*
+    * row count --> range.e.r
+    * column count --> range.e.c
+    * */
+    const range = this.range;
     console.log("Available in your function: ", {
         workbook,
         cell,
@@ -22,7 +31,8 @@ const runOnCell = async () => {
         cellValue,
         range
     });
-    return "some value"; // Whatever is returned inside this function, will be written to the current cell.
+    /* Whatever is returned inside this object in the res attribute, will be written to the current cell. */
+    return { res: "some value" };
 };
-runOnCell().then(result => result); 
+runOnCell().then(result => result);
 ````

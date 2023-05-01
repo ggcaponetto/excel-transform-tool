@@ -44,7 +44,34 @@ const getDefaultFunction = () =>
   createData(
     "New Function",
     "Performs a HTTP-GET request and concatenates the result on column B",
-    'const runOnCell = async () => {\n    const cellName = this.cellName;\n    const column = this.cell.column;\n    if(column === "C"){\n        const response = await fetch(\'https://jsonplaceholder.typicode.com/todos/1\');\n        const data = await response.json();\n        return this.cellValue + " " + data.title;\n    }\n    return this.cellValue;\n  };\nrunOnCell().then(data => data);',
+    "const runOnCell = async () => {\n" +
+      "    /* https://docs.sheetjs.com/docs/csf/book */\n" +
+      "    const workbook = this.wb;\n" +
+      '    /* e.g. { row: 15, column: "A" } */\n' +
+      "    const cell = this.cell;\n" +
+      '    /* e.g. "A15" */\n' +
+      "    const cellName = this.cellName;\n" +
+      '    /* e.g. "MySheet" */\n' +
+      "    const sheetName = this.sheetName;\n" +
+      '    /* e.g. "Hello World!" */\n' +
+      "    const cellValue = this.cellValue;\n" +
+      "    /*\n" +
+      "    * row count --> range.e.r\n" +
+      "    * column count --> range.e.c\n" +
+      "    * */\n" +
+      "    const range = this.range;\n" +
+      '    console.log("Available in your function: ", {\n' +
+      "        workbook,\n" +
+      "        cell,\n" +
+      "        cellName,\n" +
+      "        sheetName,\n" +
+      "        cellValue,\n" +
+      "        range\n" +
+      "    });\n" +
+      "    /* Whatever is returned inside this object in the res attribute, will be written to the current cell. */\n" +
+      '    return { res: "some value" };\n' +
+      "};\n" +
+      "runOnCell().then(result => result);",
     Date.now()
   );
 function createData(name, comment, data, createdAt) {
