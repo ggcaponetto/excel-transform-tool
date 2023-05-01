@@ -1,5 +1,0 @@
-import { E as ExtPay } from "./ExtPay.module.js";
-import "./_commonjsHelpers.js";
-ExtPay({ "VITE_ENV": "development", "VITE_EXTENSIONPAY_ID": "myfirstextension", "VITE_SERVER_BASE_URL": "http://localhost:4000" }.VITE_EXTENSIONPAY_ID);
-console.log("loaded ExtPay.js for payment callbacks");
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9wYWdlcy9jb250ZW50L2NvbXBvbmVudHMvRXh0UGF5L2luZGV4LnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgRXh0UGF5IGZyb20gXCJleHRwYXlcIjtcbmltcG9ydCBwcm9jZXNzIGZyb20gXCJwcm9jZXNzXCI7XG5jb25zdCBleHRwYXkgPSBFeHRQYXkocHJvY2Vzcy5lbnYuVklURV9FWFRFTlNJT05QQVlfSUQpO1xuY29uc29sZS5sb2coXCJsb2FkZWQgRXh0UGF5LmpzIGZvciBwYXltZW50IGNhbGxiYWNrc1wiKTtcbiJdLCJuYW1lcyI6WyJFeHRQYXkiLCJwcm9jZXNzIiwiVklURV9FWFRFTlNJT05QQVlfSUQiLCJjb25zb2xlIiwibG9nIl0sIm1hcHBpbmdzIjoiOztBQUVlQSxPQUFPQyxFQUFBQSxZQUFBQSxlQUFBQSx3QkFBQUEsb0JBQUFBLHdCQUFBQSx3QkFBQUEsRUFBWUMsb0JBQW9CO0FBQ3REQyxRQUFRQyxJQUFJLHdDQUF3QzsifQ==

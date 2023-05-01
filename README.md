@@ -22,13 +22,14 @@ echo "VITE_EXTENSIONPAY_ID=<myextensionid>" > .env
 
 ### Build
 1. ``npm run build``
+2. ``npm run make-docs``
 
 ### Debug
 
 1. Right click on popup and open inspector. Set breakpoints in source tab.
 2. ``window.location.reload(true)``
 
-#### Alternative
+#### Debugging Alternative
 
 1. place this in the source code
 ````js
