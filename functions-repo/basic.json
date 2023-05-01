@@ -2,16 +2,11 @@
   {
     "name": "Override any cell",
     "comment": "A Demo function that overrides any cell of the spreadsheet. (Showcase the context)",
-    "data": "const runOnCell = async () => {\n    const workbook = this.wb;\n    const cell = this.cell;\n    const cellName = this.cellName; \n    const sheetName = this.sheetName; \n    const cellValue = this.cellValue; \n    const range = this.range;\n    console.log(\"Available in your function: \", {\n        workbook,\n        cell,\n        cellName,\n        sheetName,\n        cellValue,\n        range\n    });\n    return { res: \"some value\" };\n};\nrunOnCell().then(result => result);"
+    "data": "const runOnCell = async () => {\n    const workbook = this.wb; // https://docs.sheetjs.com/docs/csf/book\n    const cell = this.cell; // e.g. { row: 15, column: \"A\" }\n    const cellName = this.cellName; // e.g. \"A15\"\n    const sheetName = this.sheetName; // \"MySheet\"\n    const cellValue = this.cellValue; // \"Hello World\"\n    const range = this.range; // row count --> range.e.r, column count --> range.e.c\n    console.log(\"Available in your function: \", {\n        workbook,\n        cell,\n        cellName,\n        sheetName,\n        cellValue,\n        range\n    });\n    return \"some value\"; // Whatever is returned inside this function, will be written to the current cell.\n};\nrunOnCell().then(result => result);"
   },
   {
-    "name": "Concat HTTP-GET on column C",
-    "comment": "Performs a HTTP-GET request and concatenates the result on column C",
-    "data": "const runOnCell = async () => {\n    const cellName = this.cellName;\n    const column = this.cell.column;\n    if(column === \"C\"){\n        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');\n        const data = await response.json();\n        return { res:  this.cellValue + \" \" + data.title }\n    }\n    return {\n      res: this.cellValue\n    };\n  };\nrunOnCell().then(data => data);"
-  },
-  {
-    "name": "Memorize data from previous cell computations",
-    "comment": "Memorize data from previous cell computations and concatenates it to the cell value.",
-    "data": "const runOnCell = async () => {\n    const cellName = this.cellName;\n    const column = this.cell.column;\n    this.scratch.counter = this.scratch.counter === undefined ? 0 : this.scratch.counter;\n    this.scratch.counter++;\n    if(column === \"C\"){\n        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');\n        const data = await response.json();\n        return {\n            res:  this.cellValue + \" \" + data.title + \" \" + this.scratch.counter,\n           scratch: this.scratch\n        }\n    }\n    return {\n      res:  this.cellValue + \" \" + this.scratch.counter,\n      scratch: this.scratch\n    }\n  };\nrunOnCell().then(data => data);"
+    "name": "Concat HTTP-GET on column B",
+    "comment": "Performs a HTTP-GET request and concatenates the result on column B",
+    "data": "const runOnCell = async () => {\n    const cellName = this.cellName;\n    const column = this.cell.column;\n    if(column === \"C\"){\n        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');\n        const data = await response.json();\n        return this.cellValue + \" \" + data.title;\n    }\n    return this.cellValue;\n  };\nrunOnCell().then(data => data);"
   }
 ]
