@@ -1,5 +1,6 @@
 import { List, ListItem } from "@mui/material";
 import React from "react";
+import Link from "@mui/material/Link";
 import "./Tutorial.css";
 export default function Tutorial() {
   return (
@@ -21,6 +22,13 @@ export default function Tutorial() {
             3. <b>Download</b> your processed file!
           </p>
         </ListItem>
+        <Link
+          href="https://excel-transformation-tool.com/documentation/"
+          target={"_blank"}
+          rel="noopener"
+        >
+          Link to documentation
+        </Link>
       </List>
     </div>
   );

@@ -43,18 +43,8 @@ ll.debug("jshint import", JSHINT);
 const getDefaultFunction = () =>
   createData(
     "New Function",
-    "A simple function that makes an API call for the column B.",
-    `const run = async () => {
-    const cellName = this.cellName;
-    const column = this.cell.column;
-    if(column === "B"){
-        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
-        const data = await response.json();
-        return this.cellValue + " " + data.title;
-    }
-    return this.cellValue;
-  };
-run().then(data => { console.log(data); return data; });`,
+    "Performs a HTTP-GET request and concatenates the result on column B",
+    'const runOnCell = async () => {\n    const cellName = this.cellName;\n    const column = this.cell.column;\n    if(column === "C"){\n        const response = await fetch(\'https://jsonplaceholder.typicode.com/todos/1\');\n        const data = await response.json();\n        return this.cellValue + " " + data.title;\n    }\n    return this.cellValue;\n  };\nrunOnCell().then(data => data);',
     Date.now()
   );
 function createData(name, comment, data, createdAt) {
