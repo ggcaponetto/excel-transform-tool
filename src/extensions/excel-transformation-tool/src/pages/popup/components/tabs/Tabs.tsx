@@ -46,15 +46,20 @@ export default function BasicTabs(props) {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }} className={"header-container"}>
-        <IconButton onClick={()=>{
-          window.open("https://excel-transformation-tool.com/", "_blank");
-        }}>
+      <Box
+        sx={{ borderBottom: 1, borderColor: "divider" }}
+        className={"header-container"}
+      >
+        <IconButton
+          onClick={() => {
+            window.open("https://excel-transformation-tool.com/", "_blank");
+          }}
+        >
           <img
-              src={logo}
-              style={{
-                maxWidth: "30px",
-              }}
+            src={logo}
+            style={{
+              maxWidth: "30px",
+            }}
           />
         </IconButton>
         <Tabs

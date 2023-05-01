@@ -133,15 +133,15 @@ const Settings = () => {
         {(() => {
           if (popupContext?.data?.user?.paid === false) {
             return (
-                <Button variant={"contained"} onClick={extpay.openPaymentPage}>
-                  Upgrade to PRO
-                </Button>
+              <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                Upgrade to PRO
+              </Button>
             );
           } else {
             return (
-                <Button variant={"contained"} onClick={extpay.openPaymentPage}>
-                  Manage plan / Cancel plan
-                </Button>
+              <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                Manage plan / Cancel plan
+              </Button>
             );
           }
         })()}

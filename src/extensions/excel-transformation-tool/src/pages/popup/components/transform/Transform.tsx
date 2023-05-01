@@ -27,7 +27,7 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 } else {
   ll.setLevel(log.levels.WARN);
 }
-const MAX_CELLS_TO_PROCESS = 10*200;
+const MAX_CELLS_TO_PROCESS = 10 * 200;
 function CircularProgressWithLabel(
   props: CircularProgressProps & { value: number }
 ) {
@@ -326,10 +326,10 @@ const Transform = () => {
                 The free plan only processes {MAX_CELLS_TO_PROCESS} cells. Get
                 unlimited processing with the PRO plan!
               </strong>
-                <Box style={{ marginTop: "15px" }}></Box>
-                <Button variant={"contained"} onClick={extpay.openPaymentPage}>
-                    Upgrade to PRO
-                </Button>
+              <Box style={{ marginTop: "15px" }}></Box>
+              <Button variant={"contained"} onClick={extpay.openPaymentPage}>
+                Upgrade to PRO
+              </Button>
             </Alert>
           );
         }
