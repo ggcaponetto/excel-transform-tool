@@ -23,6 +23,6 @@ const runOnCell = async () => {
         range
     });
     return "some value"; // Whatever is returned inside this function, will be written to the current cell.
-}
+};
 runOnCell().then(result => result); 
 ````

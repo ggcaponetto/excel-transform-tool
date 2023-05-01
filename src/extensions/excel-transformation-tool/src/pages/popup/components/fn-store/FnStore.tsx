@@ -30,7 +30,7 @@ import LibraryDownloader from "@pages/popup/components/fn-store/components/libra
 import LibraryUploader from "@pages/popup/components/fn-store/components/uploader/Uploader";
 import SaveToFileButton from "@pages/popup/components/fn-store/components/downloader/Downloader";
 import UploadIcon from "@mui/icons-material/Upload";
-import {Tooltip} from "@mui/material";
+import { Tooltip } from "@mui/material";
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -122,7 +122,11 @@ function Row(props: {
           <TextField
             id="standard-basic"
             variant="standard"
-            value={props?.tempRow?.editedName || props.row.name}
+            value={
+              props?.tempRow?.editedName !== undefined
+                ? props?.tempRow?.editedName
+                : props.row.name
+            }
             onChange={(e) => {
               onChange(props.row, {
                 ...props.row,
@@ -149,10 +153,10 @@ function Row(props: {
         <TableCell align="left">
           <Tooltip title="Deletes a function">
             <IconButton
-                onClick={() => {
-                  props.onDelete(row);
-                }}
-                color="error"
+              onClick={() => {
+                props.onDelete(row);
+              }}
+              color="error"
             >
               <DeleteIcon></DeleteIcon>
             </IconButton>
@@ -160,21 +164,21 @@ function Row(props: {
           {(() => {
             if (isEdited) {
               return (
-                  <Tooltip title="Saves a function">
-                    <IconButton
-                        disabled={hasJsHintErrors}
-                        color="primary"
-                        onClick={() => {
-                          ll.debug("onSave");
-                          onSave(props.row, {
-                            ...props.row,
-                            ...(props.tempRow || {}),
-                          });
-                        }}
-                    >
-                      <SaveIcon></SaveIcon>
-                    </IconButton>
-                  </Tooltip>
+                <Tooltip title="Saves a function">
+                  <IconButton
+                    disabled={hasJsHintErrors}
+                    color="primary"
+                    onClick={() => {
+                      ll.debug("onSave");
+                      onSave(props.row, {
+                        ...props.row,
+                        ...(props.tempRow || {}),
+                      });
+                    }}
+                  >
+                    <SaveIcon></SaveIcon>
+                  </IconButton>
+                </Tooltip>
               );
             }
           })()}
@@ -453,39 +457,39 @@ const FnStore = () => {
       >
         <Tooltip title={"Create a new function"}>
           <IconButton
-              style={{
-                display: "flex",
-              }}
-              onClick={onCreateNew}
-              color="secondary"
+            style={{
+              display: "flex",
+            }}
+            onClick={onCreateNew}
+            color="secondary"
           >
             <AddCircleIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title={"Opens options to download Community functions"}>
           <IconButton
-              style={{
-                display: "flex",
-              }}
-              onClick={onDownloadFromLibrary}
+            style={{
+              display: "flex",
+            }}
+            onClick={onDownloadFromLibrary}
           >
             <CloudDownloadIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title={"Opens options to upload functions form a local file."}>
           <IconButton
-              style={{
-                display: "flex",
-              }}
-              onClick={onUploadFromFile}
+            style={{
+              display: "flex",
+            }}
+            onClick={onUploadFromFile}
           >
             <UploadIcon />
           </IconButton>
         </Tooltip>
         <Tooltip title={"Downloads all functions to a local file."}>
           <SaveToFileButton
-              data={JSON.stringify(excelFunctions, null, 2)}
-              fileName={"ETT-Functions.json"}
+            data={JSON.stringify(excelFunctions, null, 2)}
+            fileName={"ETT-Functions.json"}
           />
         </Tooltip>
       </div>
