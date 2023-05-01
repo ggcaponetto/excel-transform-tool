@@ -20,6 +20,7 @@ import { JSHINT } from "jshint";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import axios from "axios";
+import packageJson from "../../../../../package.json";
 
 const ll = log.getLogger("FnStore");
 import process from "process";
@@ -303,9 +304,21 @@ const FnStore = () => {
   useEffect(() => {
     /* fetch the template functions from the public github repo */
     (async () => {
-      const templateFunctionsResponse = await axios.get(
-        `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/basic.json`
-      );
+      const templateFunctionsResponse = await axios
+        .get(
+          `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/${packageJson.version}/basic.json`
+        )
+        .catch(() => {
+          /* If no version specific file is found, fallback to the legacy file. */
+          return axios
+            .get(
+              `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/basic.json`
+            )
+            .catch((e) => {
+              /* If even this fails, load an empty array (no community functions) */
+              return { data: [] };
+            });
+        });
       ll.debug("got template functions", templateFunctionsResponse);
       setTemplateFunctions(templateFunctionsResponse.data);
     })();
