@@ -13,6 +13,9 @@ Create a the ``src/extensions/excel-transformation-tool/.env`` file containing t
 environment variables:
 
 ````bash
+touch src/extensions/excel-transformation-tool/.env
+````
+````bash
 echo "VITE_EXTENSIONPAY_ID=<myextensionid>" > .env
 ````
 
