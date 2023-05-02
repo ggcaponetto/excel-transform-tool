@@ -82,6 +82,13 @@ const FnEditor = (props) => {
     const source = [code];
     const options = {
       esversion: 11,
+      asi: true,
+      boss: true,
+      debug: true,
+      elision: true,
+      lastsemic: true,
+      loopfunc: true,
+      sub: true,
     };
     const predef = {};
     JSHINT(source, options, predef);

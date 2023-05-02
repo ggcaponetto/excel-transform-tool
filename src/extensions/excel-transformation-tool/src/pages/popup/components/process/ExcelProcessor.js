@@ -95,6 +95,7 @@ export default function ExcelProcessor(context, workbook) {
       let totalCellCount = getTotalCellCount();
       ll.debug("total cells: " + totalCellCount);
       let tempCellCounter = 0;
+      let scratch = {};
       for (const sheetName of Object.keys(this.workbook.Sheets)) {
         for (const cellName of Object.keys(
           this.workbook.Sheets[sheetName]
@@ -119,13 +120,16 @@ export default function ExcelProcessor(context, workbook) {
                     sheetName,
                     cellValue: this.workbook.Sheets[sheetName][cellName].w,
                     range: getRange(this.workbook.Sheets[sheetName]),
+                    scratch,
                   },
                 };
                 const evalResponse = await runInSandbox(iframe, message);
                 ll.debug("processor got message from sandbox", evalResponse);
+                /* overwrite the scratch file */
+                scratch = evalResponse.data.result.scratch;
                 XLSX.utils.sheet_add_aoa(
                   this.workbook.Sheets[sheetName],
-                  [[evalResponse.data.result]],
+                  [[evalResponse.data.result.res]],
                   { origin: cellName }
                 );
                 resolve();
@@ -142,12 +146,12 @@ export default function ExcelProcessor(context, workbook) {
           let res = await x(2);
           let percentage =
             (counter / Math.min(totalCellCount, maxOperations)) * 100;
-          /*ll.debug(
+          ll.debug(
             `processed cell ${counter}/${totalCellCount} (${percentage.toFixed(
               2
             )})`,
             res
-          );*/
+          );
           allResults.push(res);
           onProgress({
             percentage,
@@ -158,7 +162,7 @@ export default function ExcelProcessor(context, workbook) {
       };
 
       return forEachSeries(workPromises).then(() => {
-        console.log("all done!");
+        ll.debug("all done!");
         resolveProcessing(this.workbook);
       });
     });
@@ -166,10 +170,9 @@ export default function ExcelProcessor(context, workbook) {
   const runInSandbox = async (iframe, message) => {
     return new Promise((resolve) => {
       const messageHandler = (event) => {
-        if (event.source === iframe.contentWindow) {
-          window.removeEventListener("message", messageHandler);
-          resolve(event);
-        }
+        ll.debug("processor got event", event);
+        window.removeEventListener("message", messageHandler);
+        resolve(event);
       };
       window.addEventListener("message", messageHandler);
       iframe.contentWindow.postMessage(message, "*");
