@@ -3,3 +3,4 @@ node_modules
 *.env
 logs/*
 !logs/.keep
+src/extensions/excel-transformation-tool/dist.zip
