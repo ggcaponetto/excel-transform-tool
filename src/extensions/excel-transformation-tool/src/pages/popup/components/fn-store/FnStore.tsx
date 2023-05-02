@@ -305,7 +305,7 @@ const FnStore = () => {
   useEffect(() => {
     /* fetch the template functions from the public github repo */
     (async () => {
-      if (semver.satisfies(packageJson.version, "1.2.x")) {
+      if (semver.satisfies(packageJson.version, "0.1.x")) {
         const templateFunctionsResponse = await axios
           .get(
             `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/${packageJson.version}/basic.json`
@@ -317,6 +317,10 @@ const FnStore = () => {
         ll.debug("got template functions", templateFunctionsResponse);
         setTemplateFunctions(templateFunctionsResponse.data);
       } else {
+        ll.warn(
+          "The current version is not compatible the available community scripts.",
+          packageJson.version
+        );
         setTemplateFunctions([]);
       }
     })();
