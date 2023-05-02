@@ -4,3 +4,5 @@ node_modules
 logs/*
 !logs/.keep
 src/extensions/excel-transformation-tool/dist.zip
+src/extensions/excel-transformation-tool/dist.crx
+src/extensions/excel-transformation-tool/dist.pem
