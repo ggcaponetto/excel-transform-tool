@@ -5,6 +5,8 @@ A Chrome Plugin to bring JavaScript functionalities to spreasheets. Modify each 
 
 More infos on [https://excel-transformation-tool.com/](https://excel-transformation-tool.com/)
 
+Download it now in the [Chrome Web Store](https://chrome.google.com/webstore/detail/excel-transformation-tool/ngaaeaongkidpokgajggfodhinjmgclf).
+
 ![alt text](src/extensions/excel-transformation-tool/src/assets/img/Logo-cropped-128.png)
 
 ### Getting strarted
