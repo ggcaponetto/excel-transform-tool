@@ -3,6 +3,7 @@ import refreshOnUpdate from "virtual:reload-on-update-in-view";
 import * as log from "loglevel";
 const ll = log.getLogger("index.tsx");
 import process from "process";
+import XLSX from "xlsx";
 
 const isLogsEnabled = false;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
@@ -30,10 +31,10 @@ window.addEventListener("message", async function (event) {
       code: event.data.code,
       context: event.data.context,
     });
-    const result = await evalInContext(
-      event.data.code,
-      event.data.context
-    ).catch((e) => {
+    const result = await evalInContext(event.data.code, {
+      ...event.data.context,
+      XLSX,
+    }).catch((e) => {
       return e.message;
     });
     console.log("the sandbox is sending back the evaluated result: ", result);

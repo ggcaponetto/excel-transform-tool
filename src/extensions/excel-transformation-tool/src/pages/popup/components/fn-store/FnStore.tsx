@@ -45,7 +45,7 @@ ll.debug("jshint import", JSHINT);
 const getDefaultFunction = () =>
   createData(
     "New Function",
-    "Performs a HTTP-GET request and concatenates the result on column B",
+    "Overrides every cell of your spreadsheet",
     "const runOnCell = async () => {\n" +
       "    /* https://docs.sheetjs.com/docs/csf/book */\n" +
       "    const workbook = this.wb;\n" +
