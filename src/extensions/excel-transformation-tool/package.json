@@ -1,6 +1,6 @@
 {
   "name": "excel-transformation-tool",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A Chrome Plugin to bring JavaScript functionalities to spreasheets",
   "license": "MIT",
   "repository": {

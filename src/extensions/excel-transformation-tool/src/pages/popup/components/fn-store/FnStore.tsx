@@ -305,10 +305,10 @@ const FnStore = () => {
   useEffect(() => {
     /* fetch the template functions from the public github repo */
     (async () => {
-      if (semver.satisfies(packageJson.version, "0.1.x")) {
+      if (semver.satisfies(packageJson.version, "^0.1.x")) {
         const templateFunctionsResponse = await axios
           .get(
-            `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/${packageJson.version}/basic.json`
+            `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/0.1.2/basic.json`
           )
           .catch(() => {
             /* If no version specific file is found, fallback to the legacy file. */
