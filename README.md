@@ -5,7 +5,7 @@ A Chrome Plugin to bring JavaScript functionalities to spreasheets. Modify each 
 
 More infos on [https://excel-transformation-tool.com/](https://excel-transformation-tool.com/)
 
-![alt text](src/extensions/excel-transformation-tool/src/assets/img/Logo-cropped-128.png)
+![alt text](src/extensions/excel-transformation-tool/src/assets/img/Logo-cropped-128.pnggit)
 
 ### Getting strarted
 
@@ -25,7 +25,6 @@ echo "VITE_EXTENSIONPAY_ID=<myextensionid>" > .env
 
 ### Build
 1. ``npm run build``
-2. ``npm run make-docs``
 
 ### Debug
 

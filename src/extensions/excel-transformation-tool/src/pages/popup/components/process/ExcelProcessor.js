@@ -96,6 +96,7 @@ export default function ExcelProcessor(context, workbook) {
       ll.debug("total cells: " + totalCellCount);
       let tempCellCounter = 0;
       let scratch = {};
+      let tempWorkbook = this.workbook;
       for (const sheetName of Object.keys(this.workbook.Sheets)) {
         for (const cellName of Object.keys(
           this.workbook.Sheets[sheetName]
@@ -114,24 +115,22 @@ export default function ExcelProcessor(context, workbook) {
                   command: "eval",
                   code: functions[0].data,
                   context: {
-                    wb: this.workbook,
+                    workbook: tempWorkbook,
                     cell: splitCell(cellName),
                     cellName,
                     sheetName,
-                    cellValue: this.workbook.Sheets[sheetName][cellName].w,
-                    range: getRange(this.workbook.Sheets[sheetName]),
+                    cellValue: tempWorkbook.Sheets[sheetName][cellName].w,
+                    range: getRange(tempWorkbook.Sheets[sheetName]),
                     scratch,
                   },
                 };
                 const evalResponse = await runInSandbox(iframe, message);
                 ll.debug("processor got message from sandbox", evalResponse);
+                /* overwrite the local workbook with the processed one */
+                tempWorkbook = evalResponse.data.result.workbook;
                 /* overwrite the scratch file */
                 scratch = evalResponse.data.result.scratch;
-                XLSX.utils.sheet_add_aoa(
-                  this.workbook.Sheets[sheetName],
-                  [[evalResponse.data.result.res]],
-                  { origin: cellName }
-                );
+                this.workbook = tempWorkbook;
                 resolve();
               });
             });

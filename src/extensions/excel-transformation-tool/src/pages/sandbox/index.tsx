@@ -14,6 +14,16 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 
 refreshOnUpdate("pages/sandbox");
 
+
+const util = {
+  write: function (cellName, value, ctx){
+    ctx.XLSX.utils.sheet_add_aoa(
+        ctx.workbook.Sheets["Sheet1"],
+        [[value]],
+        {origin: cellName}
+    );
+  }
+}
 function evalInContext(js, context) {
   //# Return the results of the in-line anonymous function we .call with the passed context
   return function () {
@@ -33,6 +43,7 @@ window.addEventListener("message", async function (event) {
     });
     const result = await evalInContext(event.data.code, {
       ...event.data.context,
+      util,
       XLSX,
     }).catch((e) => {
       return e.message;

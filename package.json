@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "make-docs": "cd docs && npm i && npm start"
+    "make-docs": "cd docs && npm i && npm start",
+    "make-fn-repo": "cd functions-repo && npm i && npm start",
+    "build": "cd src/extensions/excel-transformation-tool && npm run build && cd ../../../ && npm run make-docs && npm run make-fn-repo"
   },
   "author": "",
   "license": "ISC"

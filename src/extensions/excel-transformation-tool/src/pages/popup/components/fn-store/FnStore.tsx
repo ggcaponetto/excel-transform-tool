@@ -48,30 +48,28 @@ const getDefaultFunction = () =>
     "Overrides every cell of your spreadsheet",
     "const runOnCell = async () => {\n" +
       "    /* https://docs.sheetjs.com/docs/csf/book */\n" +
-      "    const workbook = this.wb;\n" +
-      '    /* e.g. { row: 15, column: "A" } */\n' +
+      "    const workbook = this.workbook;\n" +
+      "    /* e.g. { row: 15, column: \"A\" } */\n" +
       "    const cell = this.cell;\n" +
-      '    /* e.g. "A15" */\n' +
+      "    /* e.g. \"A15\" */\n" +
       "    const cellName = this.cellName;\n" +
-      '    /* e.g. "MySheet" */\n' +
+      "    /* e.g. \"MySheet\" */\n" +
       "    const sheetName = this.sheetName;\n" +
-      '    /* e.g. "Hello World!" */\n' +
+      "    /* e.g. \"Hello World!\" */\n" +
       "    const cellValue = this.cellValue;\n" +
       "    /*\n" +
       "    * row count --> range.e.r\n" +
       "    * column count --> range.e.c\n" +
       "    * */\n" +
       "    const range = this.range;\n" +
-      '    console.log("Available in your function: ", {\n' +
-      "        workbook,\n" +
-      "        cell,\n" +
-      "        cellName,\n" +
-      "        sheetName,\n" +
-      "        cellValue,\n" +
-      "        range\n" +
-      "    });\n" +
-      "    /* Whatever is returned inside this object in the res attribute, will be written to the current cell. */\n" +
-      '    return { res: "some value" };\n' +
+      "    console.log(\"Available in your function: \", this);\n" +
+      "    if (cell.column === \"A\") {\n" +
+      "        this.util.write(\"J\"+cell.row, \"sometincool\", this)\n" +
+      "    } else {\n" +
+      "        this.util.write(cellName, cellValue, this)\n" +
+      "    }\n" +
+      "    /* all functions must return an object containing the processed workbook */\n" +
+      "    return {workbook: this.workbook};\n" +
       "};\n" +
       "runOnCell().then(result => result);",
     Date.now()
@@ -308,7 +306,8 @@ const FnStore = () => {
       if (semver.satisfies(packageJson.version, "^0.1.x")) {
         const templateFunctionsResponse = await axios
           .get(
-            `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/0.1.2/basic.json`
+              `http://127.0.0.1:8080/0.1.2/basic.json?v=${Date.now()}`
+            // `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/0.1.2/basic.json?v=${Date.now()}`
           )
           .catch(() => {
             /* If no version specific file is found, fallback to the legacy file. */
