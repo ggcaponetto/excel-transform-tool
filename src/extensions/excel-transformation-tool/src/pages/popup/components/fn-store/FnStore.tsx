@@ -33,6 +33,7 @@ import LibraryUploader from "@pages/popup/components/fn-store/components/uploade
 import SaveToFileButton from "@pages/popup/components/fn-store/components/downloader/Downloader";
 import UploadIcon from "@mui/icons-material/Upload";
 import { Tooltip } from "@mui/material";
+
 const isLogsEnabled = true;
 if (process.env.VITE_ENV === "development" && isLogsEnabled) {
   ll.setLevel(log.levels.DEBUG);
@@ -42,38 +43,6 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 
 ll.debug("jshint import", JSHINT);
 
-const getDefaultFunction = () =>
-  createData(
-    "New Function",
-    "Overrides every cell of your spreadsheet",
-    "const runOnCell = async () => {\n" +
-      "    /* https://docs.sheetjs.com/docs/csf/book */\n" +
-      "    const workbook = this.workbook;\n" +
-      "    /* e.g. { row: 15, column: \"A\" } */\n" +
-      "    const cell = this.cell;\n" +
-      "    /* e.g. \"A15\" */\n" +
-      "    const cellName = this.cellName;\n" +
-      "    /* e.g. \"MySheet\" */\n" +
-      "    const sheetName = this.sheetName;\n" +
-      "    /* e.g. \"Hello World!\" */\n" +
-      "    const cellValue = this.cellValue;\n" +
-      "    /*\n" +
-      "    * row count --> range.e.r\n" +
-      "    * column count --> range.e.c\n" +
-      "    * */\n" +
-      "    const range = this.range;\n" +
-      "    console.log(\"Available in your function: \", this);\n" +
-      "    if (cell.column === \"A\") {\n" +
-      "        this.util.write(\"J\"+cell.row, \"sometincool\", this)\n" +
-      "    } else {\n" +
-      "        this.util.write(cellName, cellValue, this)\n" +
-      "    }\n" +
-      "    /* all functions must return an object containing the processed workbook */\n" +
-      "    return {workbook: this.workbook};\n" +
-      "};\n" +
-      "runOnCell().then(result => result);",
-    Date.now()
-  );
 function createData(name, comment, data, createdAt) {
   return {
     name,
@@ -248,27 +217,35 @@ export function CollapsibleTable(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {props.excelFunctions
-            .sort((a, b) => {
-              if (a.name > b.name) {
-                return 1;
-              } else if (a.name) {
-                return -1;
-              } else {
-                return 0;
-              }
-            })
-            .map((row) => (
-              <Row
-                key={row.name}
-                row={row}
-                tempRow={props.tempExcelFunctions[row.name]}
-                onDelete={props.onDelete}
-                onEdit={props.onEdit}
-                onSave={props.onSave}
-                tempExcelFunctions={props.tempExcelFunctions}
-              />
-            ))}
+          {(() => {
+            const specialName = "New Function";
+            const newFunctions = props.excelFunctions.filter((functionObject) =>
+              functionObject.name.startsWith(specialName)
+            );
+            return props.excelFunctions
+              .filter((f) => f.name.startsWith(specialName) === false)
+              .sort((a, b) => {
+                if (a.name > b.name) {
+                  return 1;
+                } else if (a.name) {
+                  return -1;
+                } else {
+                  return 0;
+                }
+              })
+              .concat(newFunctions)
+              .map((row) => (
+                <Row
+                  key={row.name}
+                  row={row}
+                  tempRow={props.tempExcelFunctions[row.name]}
+                  onDelete={props.onDelete}
+                  onEdit={props.onEdit}
+                  onSave={props.onSave}
+                  tempExcelFunctions={props.tempExcelFunctions}
+                />
+              ));
+          })()}
         </TableBody>
       </Table>
     </TableContainer>
@@ -306,8 +283,8 @@ const FnStore = () => {
       if (semver.satisfies(packageJson.version, "^0.1.x")) {
         const templateFunctionsResponse = await axios
           .get(
-              `http://127.0.0.1:8080/0.1.2/basic.json?v=${Date.now()}`
-            // `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/0.1.2/basic.json?v=${Date.now()}`
+            // `http://127.0.0.1:8080/0.1.2/basic.json?v=${Date.now()}`
+            `https://raw.githubusercontent.com/ggcaponetto/excel-transform-tool/main/functions-repo/0.1.2/basic.json?v=${Date.now()}`
           )
           .catch(() => {
             /* If no version specific file is found, fallback to the legacy file. */
@@ -352,13 +329,12 @@ const FnStore = () => {
     );
   }, [excelFunctions]);
   const onCreateNew = async () => {
-    const defaultFunction = getDefaultFunction();
-    await store.write([
-      {
-        ...defaultFunction,
-        name: `New Function (${new Date().toLocaleString()})`,
-      },
-    ]);
+    const defaultFunction = templateFunctions[0];
+    const newRow = {
+      ...defaultFunction,
+      name: `New Function (${new Date().toLocaleString()})`,
+    };
+    await store.write([newRow]);
     ll.debug("stored new function", defaultFunction);
     await update();
   };
@@ -452,7 +428,7 @@ const FnStore = () => {
       ll.info(`could not delete ${oldRow.name}`, e);
     });
     /*copy the edited name as name and delete the additional
-     "editedName property" before saving */
+         "editedName property" before saving */
     newClone.name =
       newClone.editedName !== undefined ? newClone.editedName : oldRow.name;
     delete newClone.editedName;

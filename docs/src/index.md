@@ -11,7 +11,7 @@ Please note that all functions **must** be async arrow-functions.
 ````javascript
 const runOnCell = async () => {
     /* https://docs.sheetjs.com/docs/csf/book */
-    const workbook = this.wb;
+    const workbook = this.workbook;
     /* e.g. { row: 15, column: "A" } */
     const cell = this.cell;
     /* e.g. "A15" */
@@ -25,16 +25,14 @@ const runOnCell = async () => {
     * column count --> range.e.c
     * */
     const range = this.range;
-    console.log("Available in your function: ", {
-        workbook,
-        cell,
-        cellName,
-        sheetName,
-        cellValue,
-        range
-    });
-    /* Whatever is returned inside this object in the res attribute, will be written to the current cell. */
-    return { res: "some value" };
+    console.log("Available in your function: ", this);
+    if (cell.column === "A") {
+        this.util.write("J" + cell.row, "sometincool", this)
+    } else {
+        this.util.write(cellName, cellValue, this)
+    }
+    /* all functions must return an object containing the processed workbook */
+    return {workbook: this.workbook};
 };
 runOnCell().then(result => result);
 ````
@@ -44,40 +42,66 @@ To memorize values, ETT provided a ``scratch`` object, that can accumulate value
 In the following example we simply count the processed cells and append this value to the original cell value.
 ````javascript
 const runOnCell = async () => {
+    /* https://docs.sheetjs.com/docs/csf/book */
+    const workbook = this.workbook;
+    /* e.g. { row: 15, column: "A" } */
+    const cell = this.cell;
+    /* e.g. "A15" */
     const cellName = this.cellName;
-    const column = this.cell.column;
+    /* e.g. "MySheet" */
+    const sheetName = this.sheetName;
+    /* e.g. "Hello World!" */
+    const cellValue = this.cellValue;
+    /*
+    * row count --> range.e.r
+    * column count --> range.e.c
+    * */
+    const range = this.range;
+    /* the scratch object is an "accumulator" that stores values between cell processings */
     this.scratch.counter = this.scratch.counter === undefined ? 0 : this.scratch.counter;
     this.scratch.counter++;
-    if(column === "C"){
-        const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
-        const data = await response.json();
-        return {
-            res:  this.cellValue + " " + data.title + " " + this.scratch.counter,
-           scratch: this.scratch
-        }
+    console.log("Available in your function: ", this);
+    if (cell.column === "A") {
+        this.util.write("J" + cell.row, `cell counter:${this.scratch.counter}`, this)
+    } else {
+        this.util.write(cellName, cellValue, this)
     }
-    return {
-      res:  this.cellValue + " " + this.scratch.counter,
-      scratch: this.scratch
-    }
-  };
-runOnCell().then(data => data);
+    /* all functions must return an object containing the processed workbook and the scratch object */
+    return {workbook: this.workbook, scratch: this.scratch};
+}
+runOnCell().then(result => result);
 ````
 
 ### Make a HTTP call and append the result to column C
-In the following example we perform a HTTP-GET request and append the result to the original cell values of colum C.
+In the following example we perform a HTTP-GET request each time a cell on column A is read. The function appends the http-get result to the column J, concatenated with the
+cell value of column A.
 ````javascript
 const runOnCell = async () => {
+    /* https://docs.sheetjs.com/docs/csf/book */
+    const workbook = this.workbook;
+    /* e.g. { row: 15, column: "A" } */
+    const cell = this.cell;
+    /* e.g. "A15" */
     const cellName = this.cellName;
-    const column = this.cell.column;
-    if(column === "C"){
+    /* e.g. "MySheet" */
+    const sheetName = this.sheetName;
+    /* e.g. "Hello World!" */
+    const cellValue = this.cellValue;
+    /*
+    * row count --> range.e.r
+    * column count --> range.e.c
+    * */
+    const range = this.range;
+    console.log("Available in your function: ", this);
+    if (cell.column === "A") {
         const response = await fetch('https://jsonplaceholder.typicode.com/todos/1');
         const data = await response.json();
-        return { res:  this.cellValue + " " + data.title }
+        this.util.write("J" + cell.row, `${cellValue} + ${data.title}`, this)
+    } else {
+        this.util.write(cellName, cellValue, this)
     }
-    return {
-        res: this.cellValue
-    };
+    /* all functions must return an object containing the processed workbook */
+    return {workbook: this.workbook};
 };
-runOnCell().then(data => data);
+runOnCell().then(result => result);
 ````

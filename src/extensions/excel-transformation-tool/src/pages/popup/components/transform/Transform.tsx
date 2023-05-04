@@ -12,9 +12,8 @@ import process from "process";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import messaging from "./../messaging/messaging";
-import TextField from "@mui/material/TextField";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CircularProgress, {
   CircularProgressProps,
@@ -72,13 +71,24 @@ const Transform = () => {
   const hasValidUploadEvent = !!uploadEvent?.target?.files[0]?.name;
   const popupContext = useContext(PopupContext);
   const inputRef = useRef(null);
+  const [errorState, setErrorState] = useState(null);
   const isPro = popupContext?.data?.user?.paid === true;
+
+  const resetInput = () => {
+    const input = window.document.getElementById("xlsx-input");
+    input.addEventListener("click", function () {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      this.value = null;
+    });
+  };
   const reset = () => {
     setStatus(initialStatus);
     setUploadEvent(null);
     setWorkbook(null);
     setProcessedWorkbook(null);
     setSelectedFunction(null);
+    resetInput();
   };
   const update = async () => {
     const newProcessor = new ExcelProcessor({}, workbook);
@@ -111,11 +121,14 @@ const Transform = () => {
   }, [workbook]);
 
   useEffect(() => {
+    ll.debug(
+      `upload event changed. got file ${uploadEvent?.target?.files[0]?.name}`,
+      {
+        uploadEvent,
+        hasValidUploadEvent,
+      }
+    );
     if (hasValidUploadEvent) {
-      ll.debug(
-        `upload event changed. got file ${uploadEvent.target.files[0].name}`,
-        uploadEvent
-      );
       (async () => {
         const file = uploadEvent.target.files[0];
         const data = await file.arrayBuffer();
@@ -125,11 +138,11 @@ const Transform = () => {
     } else {
       setWorkbook(null);
     }
-  }, [uploadEvent]);
+  }, [uploadEvent?.target?.files[0]?.name, hasValidUploadEvent]);
 
   async function processWorkbook(workbook, functionsArray) {
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
+    return new Promise(async (resolve, reject) => {
       /* Create a new workbook */
       setStatus((p) => {
         return {
@@ -160,7 +173,10 @@ const Transform = () => {
               };
             });
           },
-          isPro ? Number.POSITIVE_INFINITY : MAX_CELLS_TO_PROCESS
+          isPro ? Number.POSITIVE_INFINITY : MAX_CELLS_TO_PROCESS,
+          (errorMessage) => {
+            reject(errorMessage);
+          }
         );
         ll.debug("Got processed workbook", newProcessedWorkbook);
         resolve(newProcessedWorkbook);
@@ -189,6 +205,7 @@ const Transform = () => {
             })()}
             <input
               onChange={(e) => {
+                ll.debug("upload event", e);
                 if (e?.target?.files[0]?.name) {
                   setUploadEvent(e);
                 } else {
@@ -260,6 +277,30 @@ const Transform = () => {
         </Typography>
       </FormControl>
       <Box style={{ marginTop: "30px" }}></Box>
+      {(() => {
+        if (errorState) {
+          return (
+            <div>
+              <Box style={{ marginTop: "30px" }}></Box>
+              <Alert
+                severity="error"
+                variant="outlined"
+                style={{ margin: "10px" }}
+              >
+                <strong>{errorState.e}</strong>
+                <Button
+                  onClick={() => {
+                    reset();
+                    setErrorState(null);
+                  }}
+                >
+                  Reset
+                </Button>
+              </Alert>
+            </div>
+          );
+        }
+      })()}
       <Button
         className={"custom-button"}
         disabled={
@@ -271,7 +312,11 @@ const Transform = () => {
         onClick={async () => {
           const processedWorkbook = await processWorkbook(workbook, [
             functions.filter((f) => f.name === selectedFunction)[0],
-          ]);
+          ]).catch((e) => {
+            ll.warn("An error occurred, resetitng everything", e);
+            reset();
+            setErrorState({ e });
+          });
           ll.debug("setting processed workbook", processedWorkbook);
           setProcessedWorkbook(processedWorkbook);
         }}

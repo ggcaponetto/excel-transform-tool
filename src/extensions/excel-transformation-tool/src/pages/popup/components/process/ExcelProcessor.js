@@ -74,16 +74,18 @@ export default function ExcelProcessor(context, workbook) {
       context,
       code,
     });
+
     function evalInContext() {
       eval(`
-        ${code}
-        return processCell();
-      `);
+                ${code}
+                return processCell();
+            `);
     }
+
     evalInContext.call(context);
   };
   const getFunctions = () => this.functions;
-  const processWorkbook = (functions, onProgress, maxOperations) => {
+  const processWorkbook = (functions, onProgress, maxOperations, onError) => {
     return new Promise((resolveProcessing) => {
       ll.debug("processing workbook...", {
         workbook: this.workbook,
@@ -103,35 +105,44 @@ export default function ExcelProcessor(context, workbook) {
         ).filter((cellName) => !cellName.startsWith("!"))) {
           tempCellCounter++;
           /*let percentage = (tempCellCounter / totalCellCount) * 100;
-          ll.debug(
-            `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
-          );*/
+                              ll.debug(
+                                `cueing processing of cell ${tempCellCounter}/${totalCellCount}`
+                              );*/
           if (tempCellCounter <= maxOperations) {
             workPromises.push(() => {
               // eslint-disable-next-line no-async-promise-executor
-              return new Promise(async (resolve) => {
-                const iframe = document.getElementById("sanbdox-bridge");
-                const message = {
-                  command: "eval",
-                  code: functions[0].data,
-                  context: {
-                    workbook: tempWorkbook,
-                    cell: splitCell(cellName),
-                    cellName,
-                    sheetName,
-                    cellValue: tempWorkbook.Sheets[sheetName][cellName].w,
-                    range: getRange(tempWorkbook.Sheets[sheetName]),
-                    scratch,
-                  },
-                };
-                const evalResponse = await runInSandbox(iframe, message);
-                ll.debug("processor got message from sandbox", evalResponse);
-                /* overwrite the local workbook with the processed one */
-                tempWorkbook = evalResponse.data.result.workbook;
-                /* overwrite the scratch file */
-                scratch = evalResponse.data.result.scratch;
-                this.workbook = tempWorkbook;
-                resolve();
+              return new Promise(async (resolve, reject) => {
+                try {
+                  const iframe = document.getElementById("sanbdox-bridge");
+                  const message = {
+                    command: "eval",
+                    code: functions[0].data,
+                    context: {
+                      workbook: tempWorkbook,
+                      cell: splitCell(cellName),
+                      cellName,
+                      sheetName,
+                      cellValue: tempWorkbook.Sheets[sheetName][cellName].w,
+                      range: getRange(tempWorkbook.Sheets[sheetName]),
+                      scratch,
+                    },
+                  };
+                  const evalResponse = await runInSandbox(iframe, message);
+                  ll.debug("processor got message from sandbox", evalResponse);
+                  if (evalResponse.data.result.error) {
+                    reject(evalResponse.data.result.error.message);
+                  } else {
+                    /* overwrite the local workbook with the processed one */
+                    tempWorkbook = evalResponse.data.result.workbook;
+                    /* overwrite the scratch file */
+                    scratch = evalResponse.data.result.scratch;
+                    this.workbook = tempWorkbook;
+                    resolve();
+                  }
+                } catch (e) {
+                  ll.debug("processor encountered an error", e);
+                  reject(e.message);
+                }
               });
             });
           }
@@ -160,10 +171,16 @@ export default function ExcelProcessor(context, workbook) {
         }
       };
 
-      return forEachSeries(workPromises).then(() => {
-        ll.debug("all done!");
-        resolveProcessing(this.workbook);
-      });
+      return forEachSeries(workPromises)
+        .then(() => {
+          ll.debug("all done!");
+          resolveProcessing(this.workbook);
+        })
+        .catch((e) => {
+          ll.debug("Something went wrong!", e);
+          resolveProcessing(this.workbook);
+          onError(e);
+        });
     });
   };
   const runInSandbox = async (iframe, message) => {

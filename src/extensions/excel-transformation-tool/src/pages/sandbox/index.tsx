@@ -1,6 +1,7 @@
 import refreshOnUpdate from "virtual:reload-on-update-in-view";
 
 import * as log from "loglevel";
+
 const ll = log.getLogger("index.tsx");
 import process from "process";
 import XLSX from "xlsx";
@@ -14,16 +15,14 @@ if (process.env.VITE_ENV === "development" && isLogsEnabled) {
 
 refreshOnUpdate("pages/sandbox");
 
-
 const util = {
-  write: function (cellName, value, ctx){
-    ctx.XLSX.utils.sheet_add_aoa(
-        ctx.workbook.Sheets["Sheet1"],
-        [[value]],
-        {origin: cellName}
-    );
-  }
-}
+  write: function (cellName, value, ctx) {
+    ctx.XLSX.utils.sheet_add_aoa(ctx.workbook.Sheets["Sheet1"], [[value]], {
+      origin: cellName,
+    });
+  },
+};
+
 function evalInContext(js, context) {
   //# Return the results of the in-line anonymous function we .call with the passed context
   return function () {
@@ -46,11 +45,16 @@ window.addEventListener("message", async function (event) {
       util,
       XLSX,
     }).catch((e) => {
-      return e.message;
+      console.warn(
+        "the sandbox encountered a problem evaluating the js: ",
+        e.message
+      );
+      return { error: e };
     });
     console.log("the sandbox is sending back the evaluated result: ", result);
     event.source.postMessage(
       {
+        e: result.error,
         result: result,
         originalData: event.data,
       },
