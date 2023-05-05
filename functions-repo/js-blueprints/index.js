@@ -60,7 +60,6 @@ const f_simple_http_request = async () => {
   /* all functions must return an object containing the processed workbook */
   return { workbook: this.workbook };
 };
-
 const f_cell_counter = async () => {
   /* https://docs.sheetjs.com/docs/csf/book */
   const workbook = this.workbook;
@@ -95,7 +94,51 @@ const f_cell_counter = async () => {
   return { workbook: this.workbook, scratch: this.scratch };
 };
 
+const f_openai = async () => {
+  if (this.cell.column === "A" && this.cell.row <= 3) {
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Authorization", "Bearer YOUR_OPENAI_API_KEY");
+    const raw = JSON.stringify({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: `Say this is a test on cell  ${this.cellName}`,
+        },
+      ],
+      temperature: 0.7,
+    });
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow",
+    };
+    let oaiRes = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      requestOptions
+    );
+    const json = await oaiRes.json();
+    console.log("openai responded", json);
+    this.util.write(
+      "J" + this.cell.row,
+      `openai response: ${json.choices[0]?.message?.content}`,
+      this
+    );
+  } else {
+    this.util.write(this.cellName, this.cellValue, this);
+  }
+  /* all functions must return an object containing the processed workbook and the scratch object */
+  return { workbook: this.workbook };
+};
 let functions = [
+  {
+    name: "Query OpenAI (ChatGPT) for the the cells A1 to A3",
+    comment:
+      "Query OpenAI (ChatGPT) for the the cells A1 to A3 and writes the OpenAI result to column J.",
+    data: f_openai,
+  },
   {
     name: "Create new column",
     comment:
