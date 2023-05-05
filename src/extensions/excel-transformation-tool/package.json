@@ -1,12 +1,26 @@
 {
   "name": "excel-transformation-tool",
   "version": "0.1.4",
-  "description": "A Chrome Plugin to bring JavaScript functionalities to spreasheets",
+  "description": "A Chrome Plugin to bring JavaScript functionalities to Google spreadsheets and Microsoft Excel",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite.git"
   },
+  "keywords": [
+    "excel",
+    "spreadsheet",
+    "xls",
+    "xlsx",
+    "csv",
+    "javascript",
+    "modify",
+    "transform",
+    "etl",
+    "extract transform load",
+    "vba",
+    "rows"
+  ],
   "scripts": {
     "build": "tsc --noEmit && vite build",
     "build:watch": "cross-env __DEV__=true vite build --watch",
