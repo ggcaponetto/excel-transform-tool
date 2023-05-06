@@ -91,7 +91,7 @@ const Settings = () => {
           imageScale={0.4}
           theme={theme}
           styleOverride={{
-            maxWidth: "120px",
+            maxWidth: "280px",
           }}
         ></LoadingScreen>
       </div>

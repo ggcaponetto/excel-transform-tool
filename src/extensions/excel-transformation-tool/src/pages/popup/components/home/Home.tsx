@@ -99,11 +99,23 @@ const Home = () => {
     const isPro = user?.paid === true;
     if (isPro === false) {
       if (isLoading || elapsedTime < waitingTime.free) {
-        return <LoadingScreen lines={5} styleOverride={{}} />;
+        return (
+          <LoadingScreen
+            styleOverride={{
+              maxWidth: "280px",
+            }}
+          ></LoadingScreen>
+        );
       }
     } else {
       if (isLoading || elapsedTime < waitingTime.pro) {
-        return <LoadingScreen lines={5} styleOverride={{}} />;
+        return (
+          <LoadingScreen
+            styleOverride={{
+              maxWidth: "280px",
+            }}
+          ></LoadingScreen>
+        );
       }
     }
     return (
