@@ -13,7 +13,7 @@ export default function LoadingScreen(props) {
   return (
     <div className={"LoadingScreen"} style={{ ...(props.styleOverride || {}) }}>
       <img
-        src={props?.theme?.name === "light" ? logoLight : logoDark}
+        src={props?.theme?.name === "light" ? logoDark : logoLight}
         style={{
           maxHeight: imageScale * 100 + "%",
           maxWidth: "100%",
