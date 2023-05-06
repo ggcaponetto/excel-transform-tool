@@ -1,8 +1,8 @@
 import { Box, LinearProgress, Typography } from "@mui/material";
 import React from "react";
 import "./LoadingScreen.css";
-import logoLight from "@assets/img/Logo.png";
-import logoDark from "@assets/img/Logo-dark.png";
+import logoLight from "@assets/img/Logo-light.png";
+import logoDark from "@assets/img/Logo-dark-cropped.png";
 
 import packageJson from "../../../../../package.json";
 export default function LoadingScreen(props) {

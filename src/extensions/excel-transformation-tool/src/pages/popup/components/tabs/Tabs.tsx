@@ -6,7 +6,7 @@ import Box from "@mui/material/Box";
 import "./Tabs.css";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
-import logo from "@assets/img/Logo-cropped.png";
+import logo from "@assets/img/Logo-cropped-light.png";
 
 interface TabPanelProps {
   children?: React.ReactNode;

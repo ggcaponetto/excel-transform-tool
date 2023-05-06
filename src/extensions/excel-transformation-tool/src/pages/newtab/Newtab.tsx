@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "@assets/img/Logo-cropped.png";
+import logo from "@assets/img/Logo-cropped-light.png";
 
 import "@pages/newtab/Newtab.css";
 import "@pages/newtab/Newtab.scss";
