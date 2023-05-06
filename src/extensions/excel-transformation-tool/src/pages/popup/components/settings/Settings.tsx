@@ -83,11 +83,16 @@ const Settings = () => {
   };
   return (
     <div className="Settings" style={{ padding: 0 }}>
+      <Box style={{ marginTop: "30px" }}></Box>
       <div style={{ maxWidth: "50%" }}>
         <LoadingScreen
           lines={0}
           shorteningAmount={18}
           imageScale={0.4}
+          theme={theme}
+          styleOverride={{
+            maxWidth: "120px",
+          }}
         ></LoadingScreen>
       </div>
       <Typography variant={"h6"}>Theme</Typography>

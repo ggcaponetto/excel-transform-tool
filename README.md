@@ -7,7 +7,7 @@ More infos on [https://excel-transformation-tool.com/](https://excel-transformat
 
 Download it now in the [Chrome Web Store](https://chrome.google.com/webstore/detail/excel-transformation-tool/ngaaeaongkidpokgajggfodhinjmgclf).
 
-![alt text](src/extensions/excel-transformation-tool/src/assets/img/Logo-cropped-128.png)
+![alt text](src/extensions/excel-transformation-tool/src/assets/img/Logo.png)
 
 ### Getting strarted
 

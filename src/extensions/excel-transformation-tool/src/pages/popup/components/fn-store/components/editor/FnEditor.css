@@ -6,3 +6,13 @@
     background: #252525;
     color: #949494;
 }
+
+/* Code folding markers */
+.cm-foldMarker {
+    color: #008c44;
+}
+
+/* Code folding gutter */
+.cm-gutter-fold {
+    background-color: #00c96a;
+}

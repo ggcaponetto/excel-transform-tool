@@ -10,16 +10,16 @@ import "./FnEditor.css";
 
 import { keymap, EditorView, gutter, lineNumbers } from "@codemirror/view";
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import { codeFolding, foldGutter, foldKeymap } from "@codemirror/language";
 import {
   syntaxHighlighting,
   defaultHighlightStyle,
+  HighlightStyle,
 } from "@codemirror/language";
-import { HighlightStyle } from "@codemirror/language";
 import { javascript } from "@codemirror/lang-javascript";
 
 const ll = log.getLogger("FnEditor");
 import process from "process";
-import { EditorState, Transaction } from "@codemirror/state";
 import { JSHINT } from "jshint";
 
 const isLogsEnabled = true;
@@ -47,6 +47,7 @@ const FnEditor = (props) => {
     return jshintData;
   };
   const initEditor = () => {
+    ll.debug("initializing the editor", {});
     const newEditorView = new EditorView({
       doc: props.row.data,
       extensions: [
@@ -57,6 +58,9 @@ const FnEditor = (props) => {
         lineNumbers(),
         EditorView.lineWrapping,
         gutter({ class: "cm-mygutter" }),
+        codeFolding(),
+        keymap.of(foldKeymap),
+        foldGutter(),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             // Handle the event here

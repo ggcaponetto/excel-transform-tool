@@ -1,6 +1,6 @@
 {
   "name": "excel-transformation-tool",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A Chrome Plugin to bring JavaScript functionalities to Google spreadsheets and Microsoft Excel",
   "license": "MIT",
   "repository": {
@@ -32,8 +32,10 @@
   "type": "module",
   "dependencies": {
     "@codemirror/autocomplete": "^6.6.0",
+    "@codemirror/basic-setup": "^0.20.0",
     "@codemirror/collab": "^6.0.0",
     "@codemirror/commands": "^6.2.3",
+    "@codemirror/fold": "^0.19.4",
     "@codemirror/language": "^6.6.0",
     "@codemirror/language-data": "^6.3.0",
     "@codemirror/lint": "^6.2.1",
