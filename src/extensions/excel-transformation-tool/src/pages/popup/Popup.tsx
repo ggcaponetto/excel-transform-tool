@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "@pages/popup/Popup.css";
 import Home from "@pages/popup/components/home/Home";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -73,6 +73,7 @@ function MUITheme(props) {
         },
         data,
         setData,
+        theme,
       }}
     >
       <ThemeProvider theme={theme.name === "dark" ? darkTheme : lightTheme}>

@@ -7,6 +7,10 @@ import "./Tabs.css";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 import logo from "@assets/img/Logo-cropped-light.png";
+import logoDark from "@assets/img/Logo-cropped-dark.png";
+import logoLight from "@assets/img/Logo-cropped-light.png";
+import { useContext } from "react";
+import PopupContext from "@pages/popup/components/context/popup-context";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -39,6 +43,7 @@ function a11yProps(index: number) {
 
 export default function BasicTabs(props) {
   const [value, setValue] = React.useState(0);
+  const popupContext = useContext(PopupContext);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
@@ -56,8 +61,9 @@ export default function BasicTabs(props) {
           }}
         >
           <img
-            src={logo}
+            src={popupContext?.theme?.name === "light" ? logoDark : logoLight}
             style={{
+              maxHeight: 1 * 100 + "%",
               maxWidth: "30px",
             }}
           />
