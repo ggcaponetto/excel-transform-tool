@@ -59,12 +59,17 @@ export default function BasicTabs(props) {
           onClick={() => {
             window.open("https://excel-transformation-tool.com/", "_blank");
           }}
+          style={{
+            width: "50px",
+            height: "50px",
+          }}
         >
           <img
             src={popupContext?.theme?.name === "light" ? logoDark : logoLight}
             style={{
               maxHeight: 1 * 100 + "%",
-              maxWidth: "30px",
+              maxWidth: "35px",
+              padding: "2px",
             }}
           />
         </IconButton>

@@ -23,13 +23,13 @@ const manifest: chrome.runtime.ManifestV3 = {
   },
   action: {
     default_popup: "src/pages/popup/index.html",
-    default_icon: "icon-250.png",
+    default_icon: "Logo-cropped-light-black-bg-250.png",
   },
   /*chrome_url_overrides: {
     newtab: "src/pages/newtab/index.html",
   },*/
   icons: {
-    "250": "icon-250.png",
+    "250": "Logo-cropped-light-black-bg-250.png",
   },
   content_scripts: [
     {
@@ -46,10 +46,13 @@ const manifest: chrome.runtime.ManifestV3 = {
       css: ["assets/css/contentStyle<KEY>.chunk.css"],
     },
   ],
-  devtools_page: "src/pages/devtools/index.html",
   web_accessible_resources: [
     {
-      resources: ["assets/js/*.js", "assets/css/*.css", "icon-250.png"],
+      resources: [
+        "assets/js/*.js",
+        "assets/css/*.css",
+        "Logo-cropped-light-black-bg-250.png",
+      ],
       matches: ["*://*/*"],
     },
   ],
