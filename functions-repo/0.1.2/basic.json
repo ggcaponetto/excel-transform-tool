@@ -6,12 +6,12 @@
     },
     {
         "name": "Create new column",
-        "comment": "Create a new cell on column J each time a cell of column A is read.",
+        "comment": "Create a new cell on column J each time a cell of column A is red.",
         "data": "const runOnCell = async () => {\n  /* https://docs.sheetjs.com/docs/csf/book */\n  const workbook = this.workbook;\n  /* e.g. { row: 15, column: \"A\" } */\n  const cell = this.cell;\n  /* e.g. \"A15\" */\n  const cellName = this.cellName;\n  /* e.g. \"MySheet\" */\n  const sheetName = this.sheetName;\n  /* e.g. \"Hello World!\" */\n  const cellValue = this.cellValue;\n  /*\n   * row count --> range.e.r\n   * column count --> range.e.c\n   * */\n  const range = this.range;\n  console.log(\"Available in your function: \", this);\n  if (cell.column === \"A\") {\n    this.util.write(\"J\" + cell.row, \"sometincool\", this);\n  } else {\n    this.util.write(cellName, cellValue, this);\n  }\n  /* all functions must return an object containing the processed workbook */\n  return { workbook: this.workbook };\n};\nrunOnCell().then(result => result);"
     },
     {
         "name": "Simple HTTP-GET request",
-        "comment": "Create a new cell with the content of a HTTP-GET request on column J each time a cell of column A is read.",
+        "comment": "Create a new cell with the content of a HTTP-GET request on column J each time a cell of column A is red.",
         "data": "const runOnCell = async () => {\n  /* https://docs.sheetjs.com/docs/csf/book */\n  const workbook = this.workbook;\n  /* e.g. { row: 15, column: \"A\" } */\n  const cell = this.cell;\n  /* e.g. \"A15\" */\n  const cellName = this.cellName;\n  /* e.g. \"MySheet\" */\n  const sheetName = this.sheetName;\n  /* e.g. \"Hello World!\" */\n  const cellValue = this.cellValue;\n  /*\n   * row count --> range.e.r\n   * column count --> range.e.c\n   * */\n  const range = this.range;\n  console.log(\"Available in your function: \", this);\n  if (cell.column === \"A\") {\n    const response = await fetch(\n      \"https://jsonplaceholder.typicode.com/todos/1\"\n    );\n    const data = await response.json();\n    this.util.write(\"J\" + cell.row, `${cellValue} + ${data.title}`, this);\n  } else {\n    this.util.write(cellName, cellValue, this);\n  }\n  /* all functions must return an object containing the processed workbook */\n  return { workbook: this.workbook };\n};\nrunOnCell().then(result => result);"
     },
     {

@@ -142,13 +142,13 @@ let functions = [
   {
     name: "Create new column",
     comment:
-      "Create a new cell on column J each time a cell of column A is read.",
+      "Create a new cell on column J each time a cell of column A is red.",
     data: f_create_new_column,
   },
   {
     name: "Simple HTTP-GET request",
     comment:
-      "Create a new cell with the content of a HTTP-GET request on column J each time a cell of column A is read.",
+      "Create a new cell with the content of a HTTP-GET request on column J each time a cell of column A is red.",
     data: f_simple_http_request,
   },
   {
